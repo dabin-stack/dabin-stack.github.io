@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="정다빈의 금융·경제·데이터 분석 포트폴리오">
+  <title>정다빈 | Finance & Data Portfolio</title>
+  <style>
+    :root { --navy:#172b4d; --blue:#426da3; --light:#f3f7fb; --line:#e3eaf2; --muted:#65758a; --white:#fff; }
+    * { box-sizing:border-box; }
+    html { scroll-behavior:smooth; scroll-padding-top:88px; }
+    body { margin:0; color:#243248; font-family:Pretendard,'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; line-height:1.75; background:#fff; }
+    a { color:inherit; text-decoration:none; }
+    .wrap { max-width:1050px; margin:0 auto; padding:0 26px; }
+    header { position:sticky; top:0; z-index:10; background:rgba(255,255,255,.96); border-bottom:1px solid var(--line); backdrop-filter:blur(12px); }
+    .nav { min-height:70px; display:flex; justify-content:space-between; align-items:center; gap:20px; }
+    .logo { font-size:19px; font-weight:800; color:var(--navy); letter-spacing:-.5px; }
+    .menu { display:flex; gap:22px; flex-wrap:wrap; }
+    .menu a { color:var(--muted); font-size:13px; font-weight:600; }
+    .menu a:hover, .menu a:focus-visible { color:var(--blue); }
+    .hero { background:linear-gradient(120deg,#f0f5fb 0%,#fff 78%); padding:105px 0 110px; }
+    .eyebrow { color:var(--blue); font-weight:700; font-size:13px; letter-spacing:2px; text-transform:uppercase; }
+    h1 { color:var(--navy); font-size:clamp(38px,6vw,62px); line-height:1.28; letter-spacing:-2px; margin:18px 0 22px; }
+    .hero p { max-width:650px; color:#586a80; font-size:17px; }
+    .actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:32px; }
+    .btn { display:inline-block; border-radius:8px; padding:11px 20px; font-size:14px; font-weight:700; border:1px solid var(--navy); }
+    .btn.primary { background:var(--navy); color:#fff; }
+    .btn.secondary { background:#fff; color:var(--navy); }
+    section { padding:80px 0; }
+    section.alt { background:#f8fafc; }
+    .section-title { margin:0 0 8px; font-size:29px; letter-spacing:-.8px; color:var(--navy); }
+    .section-sub { color:var(--muted); margin:0 0 32px; font-size:14px; }
+    .intro { max-width:800px; font-size:16px; }
+    .info-grid, .cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
+    .card { padding:25px 27px; border:1px solid var(--line); background:#fff; border-radius:12px; }
+    .card h3 { margin:0 0 8px; color:var(--navy); font-size:18px; }
+    .card p { margin:6px 0 0; color:var(--muted); font-size:14px; }
+    .label { color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.7px; }
+    .value { margin-top:5px; color:var(--navy); font-weight:650; overflow-wrap:anywhere; }
+    .timeline { border-left:2px solid #cbd9e9; margin-left:8px; padding-left:26px; display:grid; gap:28px; }
+    .timeline-item { position:relative; }
+    .timeline-item::before { content:""; position:absolute; width:11px; height:11px; border-radius:50%; background:var(--blue); left:-32.5px; top:8px; }
+    .timeline-item h3 { margin:0; font-size:18px; color:var(--navy); }
+    .timeline-item .date { color:var(--blue); font-size:13px; font-weight:700; }
+    .timeline-item p { color:var(--muted); margin:6px 0 0; font-size:14px; }
+    .cert { display:flex; align-items:center; justify-content:space-between; gap:15px; border-bottom:1px solid var(--line); padding:18px 0; }
+    .cert:first-child { padding-top:0; }
+    .cert:last-child { border-bottom:0; }
+    .cert strong { color:var(--navy); }
+    .cert small { display:block; color:var(--muted); margin-top:3px; }
+    .tag { white-space:nowrap; background:#e8f1ec; color:#26704c; font-size:12px; font-weight:700; border-radius:20px; padding:5px 12px; }
+    .tag.study { background:#eaf1fb; color:#416ba0; }
+    .chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
+    .chip { padding:7px 12px; border-radius:7px; background:var(--light); color:#395574; font-size:13px; font-weight:600; }
+    .career-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
+    .career-grid .number { font-size:12px; color:var(--blue); font-weight:800; letter-spacing:1px; }
+    .contact { background:var(--navy); color:#fff; }
+    .contact .section-title { color:#fff; }
+    .contact .section-sub { color:#d5dfed; }
+    .email { font-size:clamp(18px,3vw,25px); font-weight:700; overflow-wrap:anywhere; text-decoration:underline; text-underline-offset:5px; }
+    footer { padding:24px; text-align:center; font-size:12px; color:var(--muted); border-top:1px solid var(--line); }
+    @media(max-width:750px) { .nav { align-items:flex-start; flex-direction:column; padding-top:16px; padding-bottom:16px; gap:10px; } .menu { gap:12px 17px; } .menu a { font-size:12px; } .hero { padding:75px 0; } section { padding:58px 0; } .info-grid,.cards,.career-grid { grid-template-columns:1fr; } h1 { letter-spacing:-1px; } }
+  </style>
+</head>
+<body>
+  <header>
+    <nav class="nav wrap" aria-label="주요 메뉴">
+      <a href="#home" class="logo">DABIN<span style="color:#7296c0">.</span></a>
+      <div class="menu">
+        <a href="#about">ABOUT</a><a href="#education">EDUCATION</a><a href="#certifications">CERTIFICATIONS</a><a href="#skills">SKILLS</a><a href="#career">CAREER</a><a href="#contact">CONTACT</a>
+      </div>
+    </nav>
+  </header>
+  <main>
+    <div class="hero" id="home"><div class="wrap">
+      <div class="eyebrow">Finance · Economics · Data</div>
+      <h1>안녕하세요,<br>정다빈입니다.</h1>
+      <p>금융과 데이터를 연결하는 인재를 꿈꿉니다.<br>경제를 이해하고, 데이터를 분석하며, 더 나은 의사결정에 기여하고 싶습니다.</p>
+      <div class="actions"><a class="btn primary" href="#about">자기소개 보기 →</a><a class="btn secondary" href="#contact">Contact Me</a></div>
+    </div></div>
+    <section id="about"><div class="wrap">
+      <h2 class="section-title">About Me</h2><p class="section-sub">저를 소개합니다</p>
+      <p class="intro">안녕하세요. 국민대학교 경영정보학부에 재학 중인 정다빈입니다. 경영정보학을 공부하며 데이터 분석과 정보기술에 대한 이해를 넓히고 있습니다. 경제학과 금융시장에도 관심을 갖고 공부하며, 데이터를 기반으로 합리적인 의사결정을 돕는 금융 분야의 인재로 성장하고자 합니다.</p>
+      <div class="info-grid" style="margin-top:28px">
+        <div class="card"><div class="label">Name</div><div class="value">정다빈 | Jung Da Bin</div></div>
+        <div class="card"><div class="label">University</div><div class="value">국민대학교</div></div>
+        <div class="card"><div class="label">Major</div><div class="value">경영정보학부</div></div>
+        <div class="card"><div class="label">Interests</div><div class="value">경제학 · 금융 · 데이터 분석</div></div>
+      </div>
+    </div></section>
+    <section class="alt" id="education"><div class="wrap">
+      <h2 class="section-title">Education</h2><p class="section-sub">현재 학력</p>
+      <div class="timeline">
+        <div class="timeline-item"><div class="date">2026.03 – 현재</div><h3>국민대학교 · 경영정보학부</h3><p>데이터 분석, 프로그래밍, 데이터베이스 및 경영정보 관련 학습</p></div>
+      </div>
+    </div></section>
+    <section id="certifications"><div class="wrap">
+      <h2 class="section-title">Certifications</h2><p class="section-sub">취득 자격 및 현재 공부 중인 자격증</p>
+      <div class="card">
+        <div class="cert"><div><strong>TESAT 3급</strong><small>한국경제신문 · 경제이론 및 시사경제</small></div><span class="tag">취득 완료</span></div>
+        <div class="cert"><div><strong>SMAT 1급 (서비스경영자격)</strong><small>한국생산성본부 · 서비스경영 및 고객관리</small></div><span class="tag">취득 완료</span></div>
+        <div class="cert"><div><strong>치과위생사 면허</strong><small>보건복지부 · 국가면허</small></div><span class="tag">취득 완료</span></div>
+        <div class="cert"><div><strong>ADsP · 데이터분석 준전문가</strong><small>데이터 분석 기초 및 통계</small></div><span class="tag study">공부 중</span></div>
+        <div class="cert"><div><strong>SQLD · SQL 개발자</strong><small>데이터베이스 및 SQL</small></div><span class="tag study">공부 중</span></div>
+        <div class="cert"><div><strong>투자자산운용사</strong><small>금융상품 및 투자운용</small></div><span class="tag study">공부 중</span></div>
+      </div>
+    </div></section>
+    <section class="alt" id="skills"><div class="wrap">
+      <h2 class="section-title">Skills & Interests</h2><p class="section-sub">학습하고 있는 기술과 관심 분야</p>
+      <div class="cards">
+        <div class="card"><h3>Data Analysis</h3><p>데이터를 정리하고 분석하는 기초 역량을 학습하고 있습니다.</p><div class="chips"><span class="chip">Python</span><span class="chip">R</span><span class="chip">SQL</span></div></div>
+        <div class="card"><h3>Web Development</h3><p>웹 페이지 구조와 스타일, 기본적인 동작을 구현합니다.</p><div class="chips"><span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span></div></div>
+        <div class="card"><h3>Business & Economics</h3><p>기업과 시장을 이해하기 위한 경영·경제 지식을 쌓고 있습니다.</p><div class="chips"><span class="chip">경제학</span><span class="chip">회계학</span><span class="chip">금융시장</span></div></div>
+        <div class="card"><h3>My Strength</h3><p>꾸준한 학습 태도와 책임감, 협업 경험을 바탕으로 성장하고 있습니다.</p><div class="chips"><span class="chip">성실함</span><span class="chip">문제 해결</span><span class="chip">협업</span></div></div>
+      </div>
+    </div></section>
+    <section id="career"><div class="wrap">
+      <h2 class="section-title">Career Goals</h2><p class="section-sub">앞으로 나아가고 싶은 방향</p>
+      <div class="career-grid">
+        <div class="card"><div class="number">01 / DATA</div><h3>금융 데이터 분석가</h3><p>금융 데이터를 분석하여 시장의 흐름을 이해하고 의사결정을 지원하는 역할</p></div>
+        <div class="card"><div class="number">02 / DIGITAL</div><h3>은행 디지털·IT</h3><p>IT 기술과 데이터를 활용해 편리하고 효율적인 금융서비스를 만드는 역할</p></div>
+        <div class="card"><div class="number">03 / FINANCE</div><h3>금융·투자 분야</h3><p>경제와 기업을 분석하고 투자 및 금융시장에 대한 전문성을 키우는 분야</p></div>
+      </div>
+    </div></section>
+    <section class="contact" id="contact"><div class="wrap">
+      <h2 class="section-title">Contact</h2><p class="section-sub">함께 이야기하고 싶다면 이메일로 연락해 주세요.</p>
+      <a class="email" href="mailto:dabbin318@kookin.ac.kr">dabbin318@kookin.ac.kr ↗</a>
+    </div></section>
+  </main>
+  <footer>© <span id="year">2026</span> Jung Da Bin. All rights reserved.</footer>
+  <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+</body>
+</html>

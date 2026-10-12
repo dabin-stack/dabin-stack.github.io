@@ -3,45 +3,142 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>정다빈의 홈페이지</title>
-  <link rel="stylesheet" href="style.css">
+  <title>정다빈 | 자기소개서</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    /* 색을 바꾸고 싶으면 아래 값만 고치세요 */
+    :root {
+      --bg: #0e1726;        /* 깊은 밤색 배경 */
+      --text: #e6eaf0;      /* 본문 글자 */
+      --muted: #9aa6b8;     /* 보조 글자 */
+      --gold: #c8a96a;      /* 포인트 색 */
+      --line: rgba(200, 169, 106, .28);
+      --serif: "Noto Serif KR", "Batang", "Apple SD Gothic Neo", serif;
+      --sans: "Noto Sans KR", "Pretendard", "Malgun Gothic", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 72px; }
+    body {
+      margin: 0; background: var(--bg); color: var(--text);
+      font-family: var(--serif); line-height: 1.95; font-size: 17px;
+    }
+    a { color: var(--gold); text-decoration: none; }
+    a:hover { text-decoration: underline; text-underline-offset: 4px; }
+    a:focus-visible { outline: 2px solid var(--gold); outline-offset: 4px; }
+
+    /* 상단 메뉴 */
+    .top {
+      position: sticky; top: 0; z-index: 5;
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center;
+      gap: 4px 20px; padding: 14px clamp(20px, 6vw, 64px);
+      background: rgba(14, 23, 38, .92); border-bottom: 1px solid var(--line);
+      font-family: var(--sans); font-size: 14px;
+    }
+    .top .logo { color: var(--text); font-family: var(--serif); font-weight: 700; font-size: 16px; }
+    .top nav { display: flex; flex-wrap: wrap; gap: 4px 22px; }
+    .top nav a { color: var(--muted); }
+    .top nav a:hover { color: var(--gold); text-decoration: none; }
+
+    main { max-width: 1040px; margin: 0 auto; padding: 0 clamp(20px, 6vw, 64px); }
+
+    /* 첫 화면 */
+    .hero { padding: clamp(72px, 16vh, 160px) 0 clamp(56px, 10vh, 112px); }
+    .hero .school { font-family: var(--sans); color: var(--muted); margin: 0 0 20px; font-size: 15px; }
+    h1 {
+      position: relative; display: inline-block; margin: 0 0 28px;
+      font-size: clamp(52px, 14vw, 112px); line-height: 1.1; font-weight: 700; letter-spacing: .04em;
+    }
+    /* 처음 열릴 때 금색 선이 한 번 그려져요 */
+    h1::after {
+      content: ""; position: absolute; left: 0; right: 0; bottom: -10px; height: 2px;
+      background: var(--gold); transform-origin: left; animation: draw 1.4s ease-out both;
+    }
+    @keyframes draw { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+    .lead { max-width: 30em; font-size: clamp(19px, 3.2vw, 24px); line-height: 1.7; margin: 40px 0 0; }
+
+    /* 본문 섹션: 넓은 화면에서는 왼쪽 제목 + 오른쪽 글 */
+    section.row { padding: 56px 0; border-top: 1px solid var(--line); }
+    h2 { margin: 0 0 20px; font-size: 22px; font-weight: 600; color: var(--gold); line-height: 1.4; }
+    .row p { margin: 0 0 18px; max-width: 34em; }
+    .row p:last-child { margin-bottom: 0; }
+    dl { margin: 0; max-width: 34em; }
+    dt { font-family: var(--sans); font-weight: 500; color: var(--gold); margin-top: 8px; }
+    dd { margin: 4px 0 20px; }
+    @media (min-width: 760px) {
+      section.row { display: grid; grid-template-columns: 200px 1fr; gap: 0 64px; }
+      h2 { position: sticky; top: 96px; align-self: start; }
+    }
+
+    .mail { font-size: clamp(18px, 4.6vw, 28px); word-break: break-all; }
+    footer {
+      max-width: 1040px; margin: 0 auto; padding: 32px clamp(20px, 6vw, 64px) 56px;
+      border-top: 1px solid var(--line); color: var(--muted); font-family: var(--sans); font-size: 14px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      h1::after { animation: none; }
+      html { scroll-behavior: auto; }
+    }
+  </style>
 </head>
 <body>
 
   <header class="top">
-    <!-- 이름을 바꾸세요 -->
     <a class="logo" href="#intro">정다빈</a>
-    <!-- 메뉴: href의 #이름과 아래 section의 id가 같아야 이동해요 -->
+    <!-- href의 #이름과 아래 section의 id가 같아야 이동해요 -->
     <nav>
-      <a href="#intro">소개</a>
-      <a href="#school">학교</a>
+      <a href="#growth">성장과정</a>
+      <a href="#character">성격</a>
+      <a href="#goal">학업과 목표</a>
       <a href="#contact">연락처</a>
     </nav>
   </header>
 
   <main>
-    <!-- 첫 화면: 누구의 페이지이고 무엇을 위한 것인지 한 줄로 -->
     <section id="intro" class="hero">
-      <h1>안녕하세요, 정다빈입니다</h1>
-      <p>저와 학교, 이메일, 연락처를 한눈에 볼 수 있도록 모아 둔 페이지예요.</p>
+      <p class="school">국민대학교 경영정보학부</p>
+      <h1>정다빈</h1>
+      <p class="lead">경영과 정보기술을 바탕으로 증권업에서 일하는 사람이 되고 싶습니다.</p>
     </section>
 
-    <section id="school">
-      <h2>학교</h2>
-      <p><strong>국민대학교</strong> 경영정보학부</p>
-      <p>재학 중</p>
+    <section id="growth" class="row">
+      <h2>성장과정</h2>
+      <div>
+        <p>저는 새로운 것을 배울 때 직접 만들어 보며 이해하는 사람으로 자랐습니다. [그렇게 된 계기가 된 경험 한 가지를 적어 주세요.]</p>
+        <p>이 경험은 어려운 일도 작게 나누어 시작하면 해낼 수 있다는 믿음을 주었고, 지금도 새로운 과제 앞에서 가장 먼저 떠올리는 기준이 되었습니다.</p>
+      </div>
     </section>
 
-    <section id="contact">
+    <section id="character" class="row">
+      <h2>성격의 장단점</h2>
+      <dl>
+        <dt>장점</dt>
+        <dd>[장점 한 가지]입니다. [그 장점이 드러난 실제 사례를 한두 문장으로 적어 주세요.]</dd>
+        <dt>보완할 점</dt>
+        <dd>[단점 한 가지]한 편입니다. 이를 보완하기 위해 [내가 하고 있는 노력]을 하고 있습니다.</dd>
+      </dl>
+    </section>
+
+    <section id="goal" class="row">
+      <h2>학업과 목표</h2>
+      <div>
+        <p>경영의 문제를 데이터와 정보기술로 해결하는 경영정보학의 방식에 매력을 느껴 이 길을 선택했습니다. 경영과 IT 두 언어를 모두 이해하는 사람이 조직에서 꼭 필요하다고 생각합니다.</p>
+        <p>졸업 후에는 증권회사에서 일하는 것이 목표입니다. 시장의 데이터를 읽고 고객의 자산을 함께 키워 가는 일에 끌렸고, [증권업에 관심을 갖게 된 계기를 한두 문장으로 적어 주세요].</p>
+        <p>이를 위해 [리서치, 리테일, 금융IT 등 관심 직무]에 필요한 [금융·데이터 분석 등 공부할 분야]를 깊이 공부하고, [자격증·공모전·동아리 등 준비 계획]을 꾸준히 이어 가겠습니다.</p>
+      </div>
+    </section>
+
+    <section id="contact" class="row">
       <h2>연락처</h2>
-      <!-- 공개해도 되는 이메일만 쓰세요 -->
-      <p><a href="mailto:dabbin318@kookmin.ac.kr">dabbin318@kookmin.ac.kr</a></p>
+      <div>
+        <p>이야기를 나누고 싶으시다면 편하게 연락 주세요.</p>
+        <p class="mail"><a href="mailto:dabbin318@kookmin.ac.kr">dabbin318@kookmin.ac.kr</a></p>
+      </div>
     </section>
   </main>
 
-  <footer>
-    <p>© 2026 정다빈</p>
-  </footer>
+  <footer>© 2026 정다빈 · 국민대학교 경영정보학부</footer>
 
 </body>
 </html>

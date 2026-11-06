@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>갤러그 스타일 슈팅 게임 | 정다빈</title>
+<style>
+:root{--bg:#04050d;--fg:#e8ecff;--ink:#7a86b8;--btn:#141a36;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html,body{margin:0;background:var(--bg);color:var(--fg);color-scheme:dark;font-family:system-ui,-apple-system,"Malgun Gothic",sans-serif}
+body{display:flex;flex-direction:column;align-items:center;min-height:100%;padding:8px}
+.topbar{width:min(100%,480px);display:flex;justify-content:space-between;align-items:center;margin:4px 0 10px}
+.topbar .logo{font-size:17px;font-weight:800;letter-spacing:-.5px;color:#fff;text-decoration:none}
+.topbar .back{font-size:13px;font-weight:600;color:#9db8dd;border:1px solid rgba(157,184,221,.4);border-radius:7px;padding:7px 13px;text-decoration:none}
+.topbar .back:hover{color:#fff;border-color:#9db8dd}
+canvas{width:min(100%,480px);height:auto;aspect-ratio:3/4;background:#000;border:2px solid #1c2548;touch-action:none}
+.pad{display:flex;gap:10px;margin-top:10px;width:min(100%,480px)}
+.pad button{flex:1;padding:16px 0;font-size:20px;color:var(--fg);background:var(--btn);border:1px solid #2a3566;border-radius:10px;user-select:none;touch-action:none}
+.pad button:focus-visible{outline:2px solid #6ff}
+.hint{color:var(--ink);font-size:13px;margin:8px 0}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <a href="index.html" class="logo">DABIN<span style="color:#5ec8ff">.</span></a>
+  <a href="index.html" class="back">← 포트폴리오로</a>
+</div>
+<canvas id="g" width="480" height="640"></canvas>
+<div class="pad"><button id="bl" aria-label="왼쪽">◀</button><button id="bf" aria-label="발사">발사</button><button id="br" aria-label="오른쪽">▶</button></div>
+<p class="hint">← → 이동 · 스페이스 발사 · R 재시작</p>
+<script>
+const cv=document.getElementById('g'),ctx=cv.getContext('2d'),W=480,H=640;
+let state='start',score=0,hi=0,stage=1,lives=3,keys={},bullets=[],eb=[],en=[],parts=[],pl,fx,fy,fdir,fspd,cool=0,inv=0,t=0,banner=0;
+try{hi=+localStorage.getItem('galagaHi')||0}catch(e){}
+const stars=Array.from({length:70},()=>({x:Math.random()*W,y:Math.random()*H,s:.4+Math.random()*2}));
+const COL=['#ff5a7a','#ffb23e','#ffe45e','#5ee6a8','#5ec8ff'];
+const PTS=[50,40,30,20,10];
+
+function startStage(){
+  pl={x:W/2,y:H-50};bullets=[];eb=[];parts=[];en=[];
+  fx=70;fy=70;fdir=1;fspd=.6+stage*.15;inv=60;banner=90;
+  for(let r=0;r<5;r++)for(let c=0;c<8;c++)en.push({r,c,alive:true,m:0,x:0,y:0});
+}
+function reset(){score=0;stage=1;lives=3;startStage();state='play'}
+const sx=e=>fx+e.c*48, sy=e=>fy+e.r*38;
+function boom(x,y,c){for(let i=0;i<14;i++){const a=Math.random()*6.28,v=1+Math.random()*3;parts.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,l:30,c})}}
+function over(){state='over';if(score>hi){hi=score;try{localStorage.setItem('galagaHi',hi)}catch(e){}}}
+function hitPlayer(){
+  if(inv>0)return;
+  lives--;boom(pl.x,pl.y,'#fff');inv=120;
+  if(lives<=0)over();
+}
+
+function update(){
+  t++;
+  for(const s of stars){s.y+=s.s;if(s.y>H){s.y=0;s.x=Math.random()*W}}
+  for(const p of parts){p.x+=p.vx;p.y+=p.vy;p.l--}
+  parts=parts.filter(p=>p.l>0);
+  if(state!=='play')return;
+  if(banner>0)banner--;
+  if(inv>0)inv--;
+  if(keys.ArrowLeft)pl.x-=5;
+  if(keys.ArrowRight)pl.x+=5;
+  pl.x=Math.max(20,Math.min(W-20,pl.x));
+  if(cool>0)cool--;
+  if(keys.Space&&cool===0){bullets.push({x:pl.x,y:pl.y-16});cool=14}
+
+  fx+=fdir*fspd;
+  if(fx>120||fx<24){fdir*=-1;fx=Math.max(24,Math.min(120,fx));fy+=14;fspd*=1.03}
+  const alive=en.filter(e=>e.alive);
+  if(t%100===0&&Math.random()<.5+stage*.06){
+    const c=alive.filter(e=>e.m===0);
+    if(c.length){const e=c[Math.random()*c.length|0];e.m=1;e.x=sx(e);e.y=sy(e)}
+  }
+  if(alive.length&&Math.random()<.012+stage*.003){
+    const e=alive[Math.random()*alive.length|0];
+    const ex=e.m===0?sx(e):e.x,ey=e.m===0?sy(e):e.y;
+    if(ey>0)eb.push({x:ex,y:ey+10});
+  }
+  for(const e of alive){
+    if(e.m===0){e.x=sx(e);e.y=sy(e)}
+    else if(e.m===1){
+      e.y+=2+stage*.15;e.x+=Math.sin(e.y/30)*2+(pl.x-e.x)*.008;
+      if(e.y>H+20){e.y=-20;e.m=2}
+    }else{
+      const dx=sx(e)-e.x,dy=sy(e)-e.y,d=Math.hypot(dx,dy);
+      if(d<4)e.m=0;else{e.x+=dx/d*3;e.y+=dy/d*3}
+    }
+    if(e.m===0&&e.y>=pl.y-24){over();return}
+    if(inv===0&&Math.abs(e.x-pl.x)<20&&Math.abs(e.y-pl.y)<18){e.alive=false;boom(e.x,e.y,COL[e.r]);hitPlayer()}
+  }
+  for(const b of bullets)b.y-=9;
+  bullets=bullets.filter(b=>b.y>-10);
+  for(const b of bullets){
+    for(const e of en){
+      if(e.alive&&Math.abs(b.x-e.x)<14&&Math.abs(b.y-e.y)<12){
+        e.alive=false;b.y=-99;boom(e.x,e.y,COL[e.r]);
+        score+=PTS[e.r]*(e.m===1?2:1);
+        break;
+      }
+    }
+  }
+  for(const b of eb)b.y+=3+stage*.2;
+  eb=eb.filter(b=>b.y<H+10);
+  for(const b of eb){
+    if(inv===0&&Math.abs(b.x-pl.x)<14&&Math.abs(b.y-pl.y)<14){b.y=H+99;hitPlayer()}
+  }
+  if(state==='play'&&!en.some(e=>e.alive)){stage++;startStage()}
+}
+
+function drawShip(x,y,c){
+  ctx.fillStyle=c;ctx.beginPath();
+  ctx.moveTo(x,y-16);ctx.lineTo(x+14,y+12);ctx.lineTo(x+5,y+7);ctx.lineTo(x-5,y+7);ctx.lineTo(x-14,y+12);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fff';ctx.fillRect(x-2,y-6,4,8);
+}
+function drawEnemy(e){
+  const c=COL[e.r],x=e.x,y=e.y,f=(t>>4)&1;
+  ctx.fillStyle=c;
+  ctx.beginPath();ctx.ellipse(x,y,10,8,0,0,6.28);ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x-8,y-2);ctx.lineTo(x-16,y+(f?-6:2));ctx.lineTo(x-6,y+4);ctx.closePath();ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(x+8,y-2);ctx.lineTo(x+16,y+(f?-6:2));ctx.lineTo(x+6,y+4);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#000';ctx.fillRect(x-5,y-3,3,3);ctx.fillRect(x+2,y-3,3,3);
+}
+function text(s,x,y,size,c,a){ctx.fillStyle=c||'#fff';ctx.font=`bold ${size}px system-ui,"Malgun Gothic",sans-serif`;ctx.textAlign=a||'center';ctx.fillText(s,x,y)}
+
+function draw(){
+  ctx.fillStyle='#000';ctx.fillRect(0,0,W,H);
+  for(const s of stars){ctx.fillStyle=s.s>1.8?'#fff':'#6f7bb0';ctx.fillRect(s.x,s.y,s.s>1.8?2:1,s.s>1.8?2:1)}
+  if(state==='start'){
+    text('GALAGA',W/2,240,56,'#5ec8ff');
+    text('스타일 슈팅 게임',W/2,278,20,'#e8ecff');
+    drawShip(W/2,350,'#5ec8ff');
+    if((t>>5)&1)text('Enter 또는 화면 터치로 시작',W/2,430,18,'#ffe45e');
+    text('최고 점수 '+hi,W/2,480,16,'#7a86b8');
+    return;
+  }
+  for(const e of en)if(e.alive)drawEnemy(e);
+  for(const b of bullets){ctx.fillStyle='#fff';ctx.fillRect(b.x-1.5,b.y-8,3,12)}
+  ctx.fillStyle='#ff5a7a';for(const b of eb)ctx.fillRect(b.x-2,b.y-6,4,12);
+  if(state==='play'&&!(inv>0&&(t>>2)&1))drawShip(pl.x,pl.y,'#5ec8ff');
+  for(const p of parts){ctx.globalAlpha=p.l/30;ctx.fillStyle=p.c;ctx.fillRect(p.x,p.y,3,3)}
+  ctx.globalAlpha=1;
+  text('점수 '+score,12,24,16,'#fff','left');
+  text('최고 '+hi,W/2,24,16,'#ffe45e');
+  text('스테이지 '+stage,W-12,24,16,'#fff','right');
+  for(let i=0;i<lives;i++)drawShip(24+i*30,H-18,'#5ec8ff');
+  if(banner>0&&state==='play')text('스테이지 '+stage,W/2,H/2,32,'#ffe45e');
+  if(state==='over'){
+    ctx.fillStyle='rgba(0,0,0,.65)';ctx.fillRect(0,0,W,H);
+    text('게임 오버',W/2,250,44,'#ff5a7a');
+    text('점수 '+score,W/2,300,24);
+    text('최고 점수 '+hi,W/2,334,18,'#ffe45e');
+    text('R 키 또는 화면 터치로 재시작',W/2,390,18,'#e8ecff');
+  }
+}
+function loop(){update();draw();requestAnimationFrame(loop)}
+
+addEventListener('keydown',e=>{
+  if(['ArrowLeft','ArrowRight','Space'].includes(e.code)||e.code==='Space')e.preventDefault();
+  keys[e.code==='Space'?'Space':e.code]=true;
+  if(state==='start'&&(e.code==='Enter'||e.code==='Space'))reset();
+  if(state==='over'&&(e.code==='KeyR'||e.code==='Enter'))reset();
+});
+addEventListener('keyup',e=>{keys[e.code==='Space'?'Space':e.code]=false});
+cv.addEventListener('pointerdown',()=>{if(state!=='play')reset()});
+function hold(id,k){
+  const b=document.getElementById(id);
+  const on=e=>{e.preventDefault();keys[k]=true;if(state!=='play')reset()};
+  const off=e=>{e.preventDefault();keys[k]=false};
+  b.addEventListener('pointerdown',on);b.addEventListener('pointerup',off);
+  b.addEventListener('pointerleave',off);b.addEventListener('pointercancel',off);
+}
+hold('bl','ArrowLeft');hold('br','ArrowRight');hold('bf','Space');
+loop();
+</script>
+</body>
+</html>

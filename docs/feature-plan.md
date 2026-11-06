@@ -3,7 +3,8 @@
 최종 업데이트: 2026-11-06
 확정 사항: **기능 = 짧은 방명록**, **배포 = Netlify**, **위치 = 홈페이지 맨 아래**
 
-이 문서는 기능 명세와 검사 방법을 기록한다. (구현·커밋·push는 아직 하지 않음)
+이 문서는 기능 명세와 검사 방법을 기록한다.
+진행 상태(2026-11-06): 구현·로컬 검사·커밋/push 완료. 남은 것은 Netlify 실제 배포와 배포 후 검증.
 
 ---
 
@@ -162,9 +163,19 @@ create policy "guestbook_select_all"
 - 로그인 기능을 추가할 경우에만: 서버가 Supabase Auth JWT를 검증하고,
   `auth.uid() = user_id` RLS 정책으로 본인 데이터만 쓰기/수정 허용.
 
-## 11. 아직 하지 않은 것 (의도적으로 보류)
+## 11. 진행 상태 (2026-11-06 기준)
 
-- 방명록 UI(`#guestbook` 섹션)와 브라우저 JS를 `index.html`에 아직 추가하지 않음.
-- Supabase 테이블/정책 실제 생성 아직 안 함.
-- 의존성 설치(`npm install`) 및 커밋·push 아직 안 함.
-- 다음 단계에서 사용자 확인 후 구현한다.
+완료
+- 방명록 UI(`#guestbook` 섹션)와 브라우저 JS를 `index.html`에 추가함
+  (폼·최근 목록·네비 링크, textContent 렌더링, 브라우저 측 길이 검증).
+- Supabase 테이블 `guestbook` + RLS 읽기 정책 실제 생성, 서버 함수가 service role 키로 INSERT.
+- 서버 함수(`netlify/functions/guestbook.mjs`): GET 목록 / POST 등록, 이중 검증,
+  `total`(count: exact) 집계 반환.
+- 의존성 설치 및 커밋·push 완료 (커밋 `598d207`, `origin/main` 동기화됨).
+- 로컬 검사(`scripts/build.mjs`, `scripts/test-guestbook.mjs`) 통과
+  — 빌드 산출물 점검 + 방명록 기능 검사 12/12 PASS(연결·등록·길이검증·잘못된 형식·XSS 저장·재조회).
+
+남은 것
+- Netlify 사이트 연동 및 실제 배포 (9장 대시보드 입력값대로 레포 연결 + 환경변수 2개 등록).
+- 배포 후 기능 검사 (10장): 다른 기기 확인(2번), 재배포 후 데이터 유지(6번) 등 배포가 있어야 가능한 항목.
+- 공개 운영용 보완 (7장): 신고, 관리자 숨김(`hidden`), 반복 등록 제한(레이트 리밋) — 의도적 보류.

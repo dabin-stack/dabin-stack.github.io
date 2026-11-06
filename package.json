@@ -1,0 +1,13 @@
+{
+  "name": "dabin-portfolio",
+  "version": "1.0.0",
+  "description": "정다빈 포트폴리오 홈페이지 + 짧은 방명록 (Netlify 배포)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.0"
+  }
+}

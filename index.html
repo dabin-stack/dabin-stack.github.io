@@ -71,6 +71,27 @@
     #mole-area { display:flex; flex-direction:column; align-items:center; }
     #mole-area canvas { width:min(100%,480px); height:auto; aspect-ratio:3/4; border:2px solid #3b2a18; border-radius:10px; touch-action:none; cursor:none; }
     #mole-area .hint { color:var(--muted); font-size:13px; margin:12px 0 0; text-align:center; }
+    /* 방명록 (Guestbook) */
+    #guestbook .gb-form { display:grid; grid-template-columns:200px 1fr auto; gap:10px; align-items:start; margin-bottom:10px; }
+    #guestbook .gb-field { display:flex; flex-direction:column; gap:4px; }
+    #guestbook input[type=text] { width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; color:#243248; background:#fff; }
+    #guestbook input[type=text]:focus-visible { outline:2px solid var(--blue); outline-offset:1px; border-color:var(--blue); }
+    #guestbook .gb-count { font-size:11px; color:var(--muted); text-align:right; }
+    #guestbook .gb-submit { padding:11px 22px; border-radius:8px; border:1px solid var(--navy); background:var(--navy); color:#fff; font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap; height:44px; }
+    #guestbook .gb-submit:hover { background:#0f1f3a; }
+    #guestbook .gb-submit:disabled { opacity:.55; cursor:not-allowed; }
+    #guestbook .gb-status { min-height:20px; font-size:13px; margin:2px 0 26px; }
+    #guestbook .gb-status.ok { color:#26704c; }
+    #guestbook .gb-status.err { color:#c0392b; }
+    #guestbook .gb-list { list-style:none; margin:0; padding:0; display:grid; gap:12px; }
+    #guestbook .gb-item { border:1px solid var(--line); background:#fff; border-radius:12px; padding:16px 18px; }
+    #guestbook .gb-item .gb-top { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+    #guestbook .gb-item .gb-nick { color:var(--navy); font-weight:700; font-size:15px; overflow-wrap:anywhere; }
+    #guestbook .gb-item .gb-time { color:var(--muted); font-size:12px; white-space:nowrap; }
+    #guestbook .gb-item .gb-msg { margin:7px 0 0; color:#3a4a60; font-size:14px; overflow-wrap:anywhere; white-space:pre-wrap; }
+    #guestbook .gb-empty { color:var(--muted); font-size:14px; }
+    #guestbook .gb-total { color:var(--muted); font-size:13px; margin:0 0 14px; min-height:18px; }
+    @media(max-width:750px) { #guestbook .gb-form { grid-template-columns:1fr; } #guestbook .gb-submit { width:100%; } }
   </style>
 </head>
 <body>
@@ -78,7 +99,7 @@
     <nav class="nav wrap" aria-label="주요 메뉴">
       <a href="#home" class="logo">DABIN<span style="color:#7296c0">.</span></a>
       <div class="menu">
-        <a href="#about">ABOUT</a><a href="#education">EDUCATION</a><a href="#certifications">CERTIFICATIONS</a><a href="#skills">SKILLS</a><a href="#career">CAREER</a><a href="#project">PROJECT</a><a href="#contact">CONTACT</a>
+        <a href="#about">ABOUT</a><a href="#education">EDUCATION</a><a href="#certifications">CERTIFICATIONS</a><a href="#skills">SKILLS</a><a href="#career">CAREER</a><a href="#project">PROJECT</a><a href="#contact">CONTACT</a><a href="#guestbook">GUESTBOOK</a>
       </div>
     </nav>
   </header>
@@ -167,6 +188,30 @@
     <section class="contact" id="contact"><div class="wrap">
       <h2 class="section-title">Contact</h2><p class="section-sub">함께 이야기하고 싶다면 이메일로 연락해 주세요.</p>
       <a class="email" href="mailto:dabbin318@kookmin.ac.kr">dabbin318@kookmin.ac.kr ↗</a>
+    </div></section>
+    <section class="alt" id="guestbook"><div class="wrap">
+      <h2 class="section-title">Guestbook</h2><p class="section-sub">방문 기념으로 짧은 응원 한 줄을 남겨 주세요.</p>
+      <form class="gb-form" id="gb-form" autocomplete="off" novalidate>
+        <div class="gb-field">
+          <label for="gb-nick" class="label">별명</label>
+          <input type="text" id="gb-nick" name="nickname" maxlength="12" placeholder="별명 (2~12자)" aria-describedby="gb-nick-count">
+          <span class="gb-count" id="gb-nick-count">0 / 12</span>
+        </div>
+        <div class="gb-field">
+          <label for="gb-msg" class="label">한 줄 메시지</label>
+          <input type="text" id="gb-msg" name="message" maxlength="100" placeholder="응원 한 줄 (1~100자)" aria-describedby="gb-msg-count">
+          <span class="gb-count" id="gb-msg-count">0 / 100</span>
+        </div>
+        <div class="gb-field">
+          <span class="label" aria-hidden="true">&nbsp;</span>
+          <button type="submit" class="gb-submit" id="gb-submit">등록</button>
+        </div>
+      </form>
+      <p class="gb-status" id="gb-status" role="status" aria-live="polite"></p>
+      <p class="gb-total" id="gb-total" aria-live="polite"></p>
+      <ul class="gb-list" id="gb-list" aria-label="최근 방명록">
+        <li class="gb-empty" id="gb-loading">불러오는 중…</li>
+      </ul>
     </div></section>
   </main>
   <footer>© <span id="year">2026</span> Jung Da Bin. All rights reserved.</footer>
@@ -326,6 +371,143 @@
     }
     hold('bl', 'ArrowLeft'); hold('br', 'ArrowRight'); hold('bf', 'Space');
     loop();
+  })();
+  </script>
+  <script>
+  // 방명록 (Guestbook)
+  // - API: /api/guestbook (netlify.toml 리다이렉트 → netlify/functions/guestbook)
+  // - 렌더링은 textContent만 사용해 방문자 입력을 HTML로 실행하지 않는다.
+  // - 브라우저 측 길이 검증 + 서버 검증(이중 방어).
+  (function () {
+    const form = document.getElementById('gb-form');
+    if (!form) return;
+    const API = '/api/guestbook';
+    const NICK_MIN = 2, NICK_MAX = 12, MSG_MIN = 1, MSG_MAX = 100;
+
+    const nick = document.getElementById('gb-nick');
+    const msg = document.getElementById('gb-msg');
+    const nickCount = document.getElementById('gb-nick-count');
+    const msgCount = document.getElementById('gb-msg-count');
+    const submit = document.getElementById('gb-submit');
+    const status = document.getElementById('gb-status');
+    const total = document.getElementById('gb-total');
+    const list = document.getElementById('gb-list');
+    const LIST_LIMIT = 20;
+
+    function setStatus(text, kind) {
+      status.textContent = text || '';
+      status.className = 'gb-status' + (kind ? ' ' + kind : '');
+    }
+    nick.addEventListener('input', () => { nickCount.textContent = nick.value.length + ' / ' + NICK_MAX; });
+    msg.addEventListener('input', () => { msgCount.textContent = msg.value.length + ' / ' + MSG_MAX; });
+
+    function fmtTime(iso) {
+      const d = new Date(iso);
+      if (isNaN(d)) return '';
+      const diff = (Date.now() - d.getTime()) / 1000;
+      if (diff < 60) return '방금 전';
+      if (diff < 3600) return Math.floor(diff / 60) + '분 전';
+      if (diff < 86400) return Math.floor(diff / 3600) + '시간 전';
+      const p = n => String(n).padStart(2, '0');
+      return d.getFullYear() + '.' + p(d.getMonth() + 1) + '.' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    }
+
+    // 목록 렌더링: textContent만 사용 (XSS 방지)
+    function render(items, totalCount) {
+      list.textContent = '';
+      // 전체 개수는 서버의 count 값을 그대로 쓴다(배열 길이가 아님).
+      const n = (typeof totalCount === 'number') ? totalCount : (items ? items.length : 0);
+      if (!items || !items.length) {
+        total.textContent = '';
+        const li = document.createElement('li');
+        li.className = 'gb-empty';
+        li.textContent = '아직 글이 없어요. 첫 응원을 남겨 주세요!';
+        list.appendChild(li);
+        return;
+      }
+      total.textContent = (n > LIST_LIMIT)
+        ? ('전체 ' + n + '개 중 최근 ' + LIST_LIMIT + '개')
+        : ('전체 ' + n + '개');
+      for (const it of items) {
+        const li = document.createElement('li');
+        li.className = 'gb-item';
+        const top = document.createElement('div');
+        top.className = 'gb-top';
+        const n = document.createElement('span');
+        n.className = 'gb-nick';
+        n.textContent = it.nickname;
+        const t = document.createElement('span');
+        t.className = 'gb-time';
+        t.textContent = fmtTime(it.created_at);
+        top.appendChild(n); top.appendChild(t);
+        const m = document.createElement('p');
+        m.className = 'gb-msg';
+        m.textContent = it.message;
+        li.appendChild(top); li.appendChild(m);
+        list.appendChild(li);
+      }
+    }
+
+    async function load() {
+      try {
+        const res = await fetch(API, { headers: { 'Accept': 'application/json' } });
+        if (!res.ok) throw new Error('bad status');
+        const data = await res.json();
+        if (!data.ok) throw new Error('not ok');
+        render(data.items, data.total);
+      } catch (e) {
+        total.textContent = '';
+        list.textContent = '';
+        const li = document.createElement('li');
+        li.className = 'gb-empty';
+        li.textContent = '목록을 불러오지 못했어요. 잠시 후 새로고침해 주세요.';
+        list.appendChild(li);
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nv = nick.value.trim();
+      const mv = msg.value.trim();
+
+      // 브라우저 측 검증
+      if (nv.length < NICK_MIN || nv.length > NICK_MAX) {
+        setStatus('별명은 ' + NICK_MIN + '~' + NICK_MAX + '자로 입력해 주세요.', 'err');
+        nick.focus(); return;
+      }
+      if (mv.length < MSG_MIN || mv.length > MSG_MAX) {
+        setStatus('메시지는 ' + MSG_MIN + '~' + MSG_MAX + '자로 입력해 주세요.', 'err');
+        msg.focus(); return;
+      }
+
+      submit.disabled = true;
+      setStatus('등록 중…', '');
+      try {
+        const res = await fetch(API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nickname: nv, message: mv })
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.ok) {
+          // 서버 검증 실패 등 → 사유 표시, 입력 내용은 지우지 않음
+          setStatus((data && data.error) || '등록에 실패했어요. 잠시 후 다시 시도해 주세요.', 'err');
+          return;
+        }
+        // 성공 → 입력란 비우고 목록 새로고침
+        nick.value = ''; msg.value = '';
+        nickCount.textContent = '0 / ' + NICK_MAX;
+        msgCount.textContent = '0 / ' + MSG_MAX;
+        setStatus('등록됐어요. 고마워요!', 'ok');
+        await load();
+      } catch (err) {
+        setStatus('네트워크 오류예요. 잠시 후 다시 시도해 주세요.', 'err');
+      } finally {
+        submit.disabled = false;
+      }
+    });
+
+    load();
   })();
   </script>
   <script>

@@ -1,0 +1,32 @@
+# Netlify configuration for 정다빈 포트폴리오 + 방명록
+#
+# - publish: the static public folder produced by `npm run build`.
+#   Only HTML/CSS/browser JS/images land here. .git, .kiro, .env, docs,
+#   node_modules and the server functions are NOT inside dist/.
+# - functions: server-side code (Supabase access with the service key).
+#   This folder lives OUTSIDE the publish directory, so it is never served
+#   as a static file.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Short, friendly path for the guestbook API that maps to the functions.
+[[redirects]]
+  from = "/api/guestbook"
+  to = "/.netlify/functions/guestbook"
+  status = 200
+
+# SPA-style fallback is NOT used: this is a single static index.html site,
+# so no catch-all redirect is needed.
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    X-Frame-Options = "SAMEORIGIN"
+    Referrer-Policy = "strict-origin-when-cross-origin"

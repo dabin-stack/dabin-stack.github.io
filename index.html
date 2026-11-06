@@ -67,6 +67,10 @@
     #game-area .pad button { flex:1; padding:16px 0; font-size:20px; color:#e8ecff; background:#141a36; border:1px solid #2a3566; border-radius:10px; user-select:none; touch-action:none; cursor:pointer; }
     #game-area .pad button:focus-visible { outline:2px solid #6ff; }
     #game-area .hint { color:var(--muted); font-size:13px; margin:12px 0 0; text-align:center; }
+    /* 두더지 잡기 (이 영역 안에서만 적용) */
+    #mole-area { display:flex; flex-direction:column; align-items:center; }
+    #mole-area canvas { width:min(100%,480px); height:auto; aspect-ratio:3/4; border:2px solid #3b2a18; border-radius:10px; touch-action:none; cursor:none; }
+    #mole-area .hint { color:var(--muted); font-size:13px; margin:12px 0 0; text-align:center; }
   </style>
 </head>
 <body>
@@ -132,6 +136,7 @@
     </div></section>
     <section class="alt" id="project"><div class="wrap">
       <h2 class="section-title">Project</h2><p class="section-sub">직접 만든 미니게임 · 아래에서 바로 플레이하세요</p>
+      <p class="intro" style="margin:0 0 26px; font-size:14px; color:var(--muted);">GALAGA 슈팅 게임과 두더지 잡기, 두 가지 미니게임을 직접 즐겨 보세요.</p>
       <div class="card" style="margin-bottom:22px;">
         <h3 style="margin:0 0 8px; color:var(--navy); font-size:19px;">🕹️ GALAGA 미니게임</h3>
         <p style="margin:0; color:var(--muted); font-size:14px;">HTML · CSS · JavaScript(Canvas)로 직접 구현한 클래식 슈팅 게임입니다. 방향키로 이동하고 Space로 발사하며, 최고 점수에 도전해 보세요.</p>
@@ -146,6 +151,17 @@
           <button id="br" aria-label="오른쪽">▶</button>
         </div>
         <p class="hint">← → 이동 · 스페이스 발사 · R 재시작 · 모바일은 버튼 터치</p>
+      </div>
+
+      <div class="card" style="margin:36px 0 22px;">
+        <h3 style="margin:0 0 8px; color:var(--navy); font-size:19px;">🔨 두더지 잡기</h3>
+        <p style="margin:0; color:var(--muted); font-size:14px;">30초 안에 두더지를 최대한 많이 잡는 게임입니다. 두더지는 +10점, 검은 폭탄 두더지는 -20점이니 조심하세요.</p>
+        <div class="chips"><span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip">Canvas</span></div>
+      </div>
+
+      <div id="mole-area">
+        <canvas id="mg" width="480" height="640"></canvas>
+        <p class="hint">두더지를 클릭하거나 터치해서 잡으세요. 검은 폭탄 두더지는 피하세요.</p>
       </div>
     </div></section>
     <section class="contact" id="contact"><div class="wrap">
@@ -310,6 +326,131 @@
     }
     hold('bl', 'ArrowLeft'); hold('br', 'ArrowRight'); hold('bf', 'Space');
     loop();
+  })();
+  </script>
+  <script>
+  (function () {
+    const cv = document.getElementById('mg');
+    if (!cv) return;
+    const ctx = cv.getContext('2d'), W = 480, H = 640;
+    let activeMole = false;
+    const HX = [90, 240, 390], HY = [250, 390, 530], HOLES = [];
+    for (const y of HY) for (const x of HX) HOLES.push({ x, y });
+    let state = 'start', score = 0, hi = 0, left = 30, moles = [], pops = [], mx = W / 2, my = H / 2, swing = 0, lastSpawn = 0, t0 = 0, tNow = 0;
+    try { hi = +localStorage.getItem('moleHi') || 0 } catch (e) {}
+
+    function start() { state = 'play'; score = 0; moles = []; pops = []; t0 = performance.now(); lastSpawn = 0; left = 30; }
+    function end() { state = 'over'; if (score > hi) { hi = score; try { localStorage.setItem('moleHi', hi) } catch (e) {} } }
+
+    function spawn(el) {
+      const max = 1 + Math.min(3, Math.floor(el / 8));
+      if (moles.length >= max) return;
+      const free = HOLES.map((_, i) => i).filter(i => !moles.some(m => m.h === i));
+      if (!free.length) return;
+      const bomb = Math.random() < Math.min(.25, .08 + el / 200);
+      const life = Math.max(650, 1500 - el * 25);
+      moles.push({ h: free[Math.random() * free.length | 0], born: tNow, life, bomb });
+    }
+    function vis(m) {
+      const p = (tNow - m.born) / m.life;
+      if (p < 0 || p > 1) return 0;
+      return Math.min(1, Math.sin(p * Math.PI) * 1.6);
+    }
+    function update(now) {
+      tNow = now;
+      if (swing > 0) swing--;
+      for (const p of pops) { p.y -= 1; p.l--; }
+      pops = pops.filter(p => p.l > 0);
+      if (state !== 'play') return;
+      const el = (now - t0) / 1000;
+      left = Math.max(0, 30 - el);
+      if (left <= 0) { end(); return; }
+      moles = moles.filter(m => now - m.born < m.life);
+      const gap = Math.max(350, 900 - el * 18);
+      if (now - lastSpawn > gap) { lastSpawn = now; spawn(el); }
+    }
+
+    function drawMole(m) {
+      const h = HOLES[m.h], v = vis(m);
+      if (v <= 0) return;
+      ctx.save();
+      ctx.beginPath(); ctx.rect(h.x - 60, h.y - 110, 120, 110); ctx.clip();
+      const cy = h.y + 40 - v * 62;
+      ctx.fillStyle = m.bomb ? '#2c2c34' : '#8a5a33';
+      ctx.beginPath(); ctx.arc(h.x, cy, 34, 0, 6.28); ctx.fill();
+      ctx.fillStyle = m.bomb ? '#ff4040' : '#fff';
+      ctx.beginPath(); ctx.arc(h.x - 12, cy - 6, 7, 0, 6.28); ctx.arc(h.x + 12, cy - 6, 7, 0, 6.28); ctx.fill();
+      ctx.fillStyle = '#000';
+      ctx.beginPath(); ctx.arc(h.x - 12, cy - 6, 3, 0, 6.28); ctx.arc(h.x + 12, cy - 6, 3, 0, 6.28); ctx.fill();
+      ctx.fillStyle = m.bomb ? '#555' : '#e8a0a0';
+      ctx.beginPath(); ctx.ellipse(h.x, cy + 8, 9, 6, 0, 0, 6.28); ctx.fill();
+      if (m.bomb) { ctx.strokeStyle = '#ffb23e'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(h.x, cy - 34); ctx.lineTo(h.x + 8, cy - 46); ctx.stroke(); ctx.fillStyle = '#ff4040'; ctx.fillRect(h.x + 6, cy - 50, 6, 6); }
+      ctx.restore();
+    }
+    function text(s, x, y, size, c, a) { ctx.fillStyle = c || '#fff'; ctx.font = `bold ${size}px system-ui,"Malgun Gothic",sans-serif`; ctx.textAlign = a || 'center'; ctx.fillText(s, x, y); }
+
+    function drawHammer() {
+      ctx.save(); ctx.translate(mx, my);
+      ctx.rotate(swing > 0 ? -.2 : -.9);
+      ctx.fillStyle = '#a8732f'; ctx.fillRect(-4, -10, 8, 56);
+      ctx.fillStyle = '#6a6e78'; ctx.fillRect(-26, -34, 52, 28);
+      ctx.fillStyle = '#8c909c'; ctx.fillRect(-26, -34, 52, 8);
+      ctx.restore();
+    }
+    function draw() {
+      ctx.fillStyle = '#3f7a35'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#386f2f'; for (let i = 0; i < 14; i++) ctx.fillRect((i * 97) % W, (i * 181) % H, 40, 6);
+      ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(0, 0, W, 50);
+      if (state === 'start') {
+        text('두더지 잡기', W / 2, 230, 48, '#ffe45e');
+        text('30초 안에 최대한 많이 잡으세요', W / 2, 275, 18, '#f3f0e0');
+        text('두더지 +10 · 폭탄 두더지 -20', W / 2, 305, 16, '#cfe3b8');
+        text('클릭 또는 터치로 시작', W / 2, 370, 22, '#fff');
+        text('최고 점수 ' + hi, W / 2, 410, 16, '#cfe3b8');
+        drawHammer(); return;
+      }
+      for (let i = 0; i < HOLES.length; i++) {
+        const h = HOLES[i];
+        ctx.fillStyle = '#1a120a'; ctx.beginPath(); ctx.ellipse(h.x, h.y, 52, 18, 0, 0, 6.28); ctx.fill();
+        for (const m of moles) if (m.h === i) drawMole(m);
+        ctx.fillStyle = '#5a3b1e'; ctx.beginPath(); ctx.ellipse(h.x, h.y + 4, 56, 14, 0, 0, 3.14); ctx.fill();
+      }
+      text('점수 ' + score, 14, 32, 22, '#fff', 'left');
+      text('시간 ' + Math.ceil(left), W - 14, 32, 22, left <= 5 ? '#ff8a7a' : '#fff', 'right');
+      for (const p of pops) { ctx.globalAlpha = p.l / 40; text(p.s, p.x, p.y, 26, p.c); ctx.globalAlpha = 1; }
+      if (state === 'over') {
+        ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(0, 0, W, H);
+        text('시간 종료', W / 2, 240, 44, '#ffe45e');
+        text('점수 ' + score, W / 2, 300, 28);
+        text('최고 점수 ' + hi, W / 2, 338, 18, '#cfe3b8');
+        ctx.fillStyle = '#ffe45e'; ctx.fillRect(W / 2 - 90, 380, 180, 52);
+        text('다시 하기', W / 2, 414, 22, '#2a1b08');
+      }
+      drawHammer();
+    }
+    function loop(now) { update(now); draw(); requestAnimationFrame(loop); }
+
+    function pos(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) * W / r.width, (e.clientY - r.top) * H / r.height]; }
+    cv.addEventListener('pointermove', e => { [mx, my] = pos(e); });
+    cv.addEventListener('pointerdown', e => {
+      activeMole = true;
+      [mx, my] = pos(e); swing = 8;
+      if (state !== 'play') {
+        if (state === 'start' || (mx > W / 2 - 90 && mx < W / 2 + 90 && my > 380 && my < 432)) start();
+        return;
+      }
+      for (let i = moles.length - 1; i >= 0; i--) {
+        const m = moles[i], h = HOLES[m.h];
+        if (vis(m) > .3 && Math.hypot(mx - h.x, my - (h.y - 22)) < 42) {
+          const d = m.bomb ? -20 : 10; score += d;
+          pops.push({ x: h.x, y: h.y - 70, l: 40, s: (d > 0 ? '+' : '') + d, c: d > 0 ? '#ffe45e' : '#ff6a5a' });
+          moles.splice(i, 1); break;
+        }
+      }
+    });
+    document.addEventListener('pointerdown', e => { if (!cv.contains(e.target)) activeMole = false; });
+    addEventListener('keydown', e => { if (activeMole && state !== 'play' && (e.code === 'Enter' || e.code === 'Space')) start(); });
+    requestAnimationFrame(loop);
   })();
   </script>
 </body>

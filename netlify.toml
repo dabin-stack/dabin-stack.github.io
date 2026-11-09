@@ -20,7 +20,10 @@
   node_bundler = "esbuild"
 
 [build.environment]
-  NODE_VERSION = "20"
+  # Node 22+ 는 native WebSocket 을 제공한다. supabase-js 가 클라이언트 생성 시
+  # WebSocket 을 요구하는데, Node 20 에는 없어서 배포 함수가
+  # "native WebSocket not found" 로 500 을 반환했다. 22 로 올려 해결한다.
+  NODE_VERSION = "22"
 
 # Short, friendly path for the guestbook API that maps to the functions.
 [[redirects]]

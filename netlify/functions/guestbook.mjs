@@ -44,16 +44,17 @@ function getClient() {
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-    // 어떤 변수가 비었는지 로그로 남긴다(값 자체는 찍지 않음).
-    console.error(
-      "Supabase env missing:",
-      "URL=" + (SUPABASE_URL ? "set" : "MISSING"),
-      "KEY=" + (SUPABASE_SERVICE_ROLE_KEY ? "set" : "MISSING")
-    );
     throw new Error("Supabase env vars are not configured.");
   }
+  // 이 방명록은 insert/select 만 쓰고 Realtime(구독)을 쓰지 않는다.
+  // supabase-js 는 기본적으로 Realtime 용 WebSocket 을 초기화하는데,
+  // Netlify Functions 의 Node 런타임에 native WebSocket 이 없으면
+  // "native WebSocket not found" 로 클라이언트 생성이 실패한다.
+  // realtime 하트비트를 끄고 자동 재연결을 막아 WebSocket 의존을 제거한다.
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
-    auth: { persistSession: false },
+    auth: { persistSession: false, autoRefreshToken: false },
+    realtime: { params: { eventsPerSecond: 0 } },
+    global: { headers: { "X-Client-Info": "guestbook-netlify-fn" } },
   });
 }
 
@@ -105,19 +106,6 @@ export async function handler(event) {
 
     return json(405, { ok: false, error: "지원하지 않는 메서드입니다." });
   } catch (err) {
-    // 임시 진단: 어떤 환경변수가 비었는지 / 실제 에러 메시지를 응답에 담는다.
-    // (값 자체는 노출하지 않고 존재 여부와 길이만 보여준다. 원인 확인 후 제거 예정.)
-    const u = process.env.SUPABASE_URL;
-    const k = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    return json(500, {
-      ok: false,
-      error: "서버 설정 오류입니다.",
-      _diag: {
-        url: u ? "set(len " + u.length + ")" : "MISSING",
-        key: k ? "set(len " + k.length + ")" : "MISSING",
-        err: String(err && err.message ? err.message : err),
-        envKeys: Object.keys(process.env).filter(n => n.startsWith("SUPA")),
-      },
-    });
+    return json(500, { ok: false, error: "서버 설정 오류입니다." });
   }
 }

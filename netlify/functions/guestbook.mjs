@@ -105,6 +105,19 @@ export async function handler(event) {
 
     return json(405, { ok: false, error: "지원하지 않는 메서드입니다." });
   } catch (err) {
-    return json(500, { ok: false, error: "서버 설정 오류입니다." });
+    // 임시 진단: 어떤 환경변수가 비었는지 / 실제 에러 메시지를 응답에 담는다.
+    // (값 자체는 노출하지 않고 존재 여부와 길이만 보여준다. 원인 확인 후 제거 예정.)
+    const u = process.env.SUPABASE_URL;
+    const k = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    return json(500, {
+      ok: false,
+      error: "서버 설정 오류입니다.",
+      _diag: {
+        url: u ? "set(len " + u.length + ")" : "MISSING",
+        key: k ? "set(len " + k.length + ")" : "MISSING",
+        err: String(err && err.message ? err.message : err),
+        envKeys: Object.keys(process.env).filter(n => n.startsWith("SUPA")),
+      },
+    });
   }
 }

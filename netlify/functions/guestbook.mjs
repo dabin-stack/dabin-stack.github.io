@@ -22,9 +22,6 @@
 
 import { createClient } from "@supabase/supabase-js";
 
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
 const NICK_MIN = 2;
 const NICK_MAX = 12;
 const MSG_MIN = 1;
@@ -41,7 +38,18 @@ function json(statusCode, body) {
 }
 
 function getClient() {
+  // 환경변수는 모듈 로드 시점이 아니라 "함수 실행 시점"에 읽는다.
+  // Netlify에서 secret 로 지정된 변수는 로드 시점엔 비어 있을 수 있어,
+  // 최상단 상수로 캐시하면 undefined 로 굳는 문제가 생긴다.
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+    // 어떤 변수가 비었는지 로그로 남긴다(값 자체는 찍지 않음).
+    console.error(
+      "Supabase env missing:",
+      "URL=" + (SUPABASE_URL ? "set" : "MISSING"),
+      "KEY=" + (SUPABASE_SERVICE_ROLE_KEY ? "set" : "MISSING")
+    );
     throw new Error("Supabase env vars are not configured.");
   }
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {

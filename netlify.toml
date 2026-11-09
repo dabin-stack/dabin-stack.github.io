@@ -12,6 +12,13 @@
   publish = "dist"
   functions = "netlify/functions"
 
+# Bundle serverless functions with esbuild. Without an explicit bundler the
+# local `netlify dev` watcher can intermittently drop the function on Windows
+# ("Removed function guestbook"), causing /api/guestbook to 404 even though the
+# function itself works. esbuild also matches Netlify's production bundling.
+[functions]
+  node_bundler = "esbuild"
+
 [build.environment]
   NODE_VERSION = "20"
 

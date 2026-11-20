@@ -184,6 +184,42 @@
     #mole-area canvas { width:min(100%,480px); height:auto; aspect-ratio:3/4; border:2px solid var(--line); border-radius:10px; touch-action:none; cursor:none; box-shadow:0 0 40px rgba(232,192,106,.08); }
     #mole-area .hint { color:var(--muted); font-size:13px; margin:12px 0 0; text-align:center; }
 
+    /* 음악 응원 보드 (Music Cheer Board) */
+    #music .mc-toolbar { display:flex; gap:8px; margin:0 0 22px; flex-wrap:wrap; }
+    #music .mc-sort { padding:8px 15px; border-radius:8px; border:1px solid var(--line); background:var(--panel); color:var(--muted); font-size:13px; font-weight:600; cursor:pointer; font-family:inherit; transition:border-color .2s, color .2s; }
+    #music .mc-sort:hover { border-color:var(--mint); color:var(--mint); }
+    #music .mc-sort[aria-pressed="true"] { border-color:var(--mint); color:var(--mint); background:rgba(79,227,193,.1); }
+    #music .mc-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; }
+    #music .mc-card {
+      border:1px solid var(--line); background:var(--panel); border-radius:16px; overflow:hidden;
+      display:flex; flex-direction:column; transition:transform .18s ease, border-color .25s, box-shadow .25s;
+    }
+    #music .mc-card:hover { transform:translateY(-6px); border-color:rgba(79,227,193,.45); box-shadow:0 20px 50px rgba(0,0,0,.5); }
+    #music .mc-art { position:relative; aspect-ratio:1/1; display:flex; align-items:flex-end; justify-content:flex-start; }
+    #music .mc-art img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+    /* 노래 분위기에 맞는 그라데이션 오버레이 (이미지 위에 은은하게) */
+    #music .mc-card[data-work="music-1"] .mc-art { background:linear-gradient(135deg,#7a3b2e,#c6692f); }
+    #music .mc-card[data-work="music-2"] .mc-art { background:linear-gradient(135deg,#2a1840,#6c3b86); }
+    #music .mc-card[data-work="music-3"] .mc-art { background:linear-gradient(135deg,#5a1230,#b03050); }
+    #music .mc-art::after { content:""; position:absolute; inset:0; background:linear-gradient(180deg,rgba(10,15,28,0) 35%,rgba(10,15,28,.78) 100%); }
+    #music .mc-note { position:relative; z-index:1; margin:12px; font-size:26px; filter:drop-shadow(0 2px 6px rgba(0,0,0,.6)); }
+    #music .mc-body { padding:16px 18px 18px; display:flex; flex-direction:column; gap:3px; flex:1; }
+    #music .mc-title { color:var(--text); font-size:18px; font-weight:700; overflow-wrap:anywhere; }
+    #music .mc-artist { color:var(--mint); font-size:13px; font-weight:600; }
+    #music .mc-count { color:var(--muted); font-size:13px; margin-top:6px; }
+    #music .mc-count b { color:var(--gold); font-size:18px; }
+    #music .mc-last { color:#6f7e98; font-size:12px; min-height:16px; }
+    #music .mc-cheer {
+      margin-top:12px; padding:11px 16px; border-radius:9px; border:1px solid var(--mint); background:var(--mint);
+      color:#06241d; font-size:14px; font-weight:700; cursor:pointer; transition:transform .16s, box-shadow .25s, opacity .2s;
+    }
+    #music .mc-cheer:hover { transform:translateY(-2px) scale(1.03); box-shadow:0 10px 26px rgba(79,227,193,.35); }
+    #music .mc-cheer:disabled { opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
+    #music .mc-status { min-height:18px; font-size:12px; margin-top:8px; }
+    #music .mc-status.ok { color:var(--mint); }
+    #music .mc-status.err { color:#ff7a6a; }
+    @media(max-width:750px) { #music .mc-grid { grid-template-columns:1fr; } }
+
     /* 방명록 (Guestbook) */
     #guestbook .gb-form { display:grid; grid-template-columns:200px 1fr auto; gap:10px; align-items:start; margin-bottom:10px; }
     #guestbook .gb-field { display:flex; flex-direction:column; gap:4px; }
@@ -218,7 +254,7 @@
     <nav class="nav wrap" aria-label="주요 메뉴">
       <a href="#home" class="logo">DABIN<span style="color:var(--mint)">.</span></a>
       <div class="menu">
-        <a href="#about">ABOUT</a><a href="#education">EDUCATION</a><a href="#certifications">CERTIFICATIONS</a><a href="#skills">SKILLS</a><a href="#career">CAREER</a><a href="#project">PROJECT</a><a href="#contact">CONTACT</a><a href="#guestbook">GUESTBOOK</a>
+        <a href="#about">ABOUT</a><a href="#education">EDUCATION</a><a href="#certifications">CERTIFICATIONS</a><a href="#skills">SKILLS</a><a href="#career">CAREER</a><a href="#project">PROJECT</a><a href="#contact">CONTACT</a><a href="#music">MUSIC</a><a href="#guestbook">GUESTBOOK</a>
       </div>
     </nav>
   </header>
@@ -308,6 +344,49 @@
     <section class="contact" id="contact"><div class="wrap">
       <h2 class="section-title reveal">Contact</h2><p class="section-sub reveal">함께 이야기하고 싶다면 이메일로 연락해 주세요.</p>
       <a class="email reveal" href="mailto:dabbin318@kookmin.ac.kr">dabbin318@kookmin.ac.kr ↗</a>
+    </div></section>
+    <section id="music"><div class="wrap">
+      <h2 class="section-title reveal">Music Cheer Board</h2>
+      <p class="section-sub reveal">요즘 즐겨 듣는 노래예요. 마음에 드는 곡에 응원을 남겨 주세요.</p>
+      <div class="mc-toolbar reveal" role="group" aria-label="정렬">
+        <button type="button" class="mc-sort" id="mc-sort-default" aria-pressed="true">기본 순</button>
+        <button type="button" class="mc-sort" id="mc-sort-top" aria-pressed="false">응원 많은 순</button>
+      </div>
+      <div class="mc-grid reveal" id="mc-grid">
+        <div class="mc-card" data-work="music-1">
+          <div class="mc-art"><img src="images/music-1.jpg" alt="she - 잔나비 앨범 커버" loading="lazy"><span class="mc-note" aria-hidden="true">🎵</span></div>
+          <div class="mc-body">
+            <span class="mc-title">she</span>
+            <span class="mc-artist">잔나비</span>
+            <span class="mc-count">응원 <b data-count>0</b>회</span>
+            <span class="mc-last" data-last></span>
+            <button type="button" class="mc-cheer" data-cheer>응원하기</button>
+            <p class="mc-status" data-status role="status" aria-live="polite"></p>
+          </div>
+        </div>
+        <div class="mc-card" data-work="music-2">
+          <div class="mc-art"><img src="images/music-2.jpg" alt="Electra - 검정치마 앨범 커버" loading="lazy"><span class="mc-note" aria-hidden="true">🎵</span></div>
+          <div class="mc-body">
+            <span class="mc-title">Electra</span>
+            <span class="mc-artist">검정치마</span>
+            <span class="mc-count">응원 <b data-count>0</b>회</span>
+            <span class="mc-last" data-last></span>
+            <button type="button" class="mc-cheer" data-cheer>응원하기</button>
+            <p class="mc-status" data-status role="status" aria-live="polite"></p>
+          </div>
+        </div>
+        <div class="mc-card" data-work="music-3">
+          <div class="mc-art"><img src="images/music-3.jpg" alt="toxic till the end - ROSÉ 앨범 커버" loading="lazy"><span class="mc-note" aria-hidden="true">🎵</span></div>
+          <div class="mc-body">
+            <span class="mc-title">toxic till the end</span>
+            <span class="mc-artist">ROSÉ</span>
+            <span class="mc-count">응원 <b data-count>0</b>회</span>
+            <span class="mc-last" data-last></span>
+            <button type="button" class="mc-cheer" data-cheer>응원하기</button>
+            <p class="mc-status" data-status role="status" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
     </div></section>
     <section class="alt" id="guestbook"><div class="wrap">
       <h2 class="section-title reveal">Guestbook</h2><p class="section-sub reveal">방문 기념으로 짧은 응원 한 줄을 남겨 주세요.</p>
@@ -616,6 +695,153 @@
     }
     hold('bl', 'ArrowLeft'); hold('br', 'ArrowRight'); hold('bf', 'Space');
     loop();
+  })();
+  </script>
+  <script>
+  // 음악 응원 보드 (Music Cheer Board)
+  // - 방명록과 동일하게 Supabase REST(PostgREST)를 브라우저에서 직접 호출한다.
+  // - 공개 가능한 "anon publishable" 키만 사용한다(service_role 금지).
+  // - 응원 1번 = reactions 테이블에 1줄 INSERT. 숫자를 덮어쓰지 않는다.
+  // - 노래별 누적 개수/최근 응원 시각은 reaction_counts 뷰에서 읽는다.
+  //   (뷰가 없으면 reactions를 직접 세는 방식으로 폴백)
+  // - 서버 저장이 성공한 뒤에만 숫자를 올리고 성공 메시지를 표시한다.
+  (function () {
+    const grid = document.getElementById('mc-grid');
+    if (!grid) return;
+
+    const SUPA_URL = 'https://zphzpmbuvqiknqfuiitu.supabase.co';
+    const SUPA_ANON = 'sb_publishable_DGc4vNTgEaWvTugqM-XPQQ_CRr9Qzwx';
+    const HDRS = { apikey: SUPA_ANON, Authorization: 'Bearer ' + SUPA_ANON };
+    const REST = SUPA_URL + '/rest/v1/';
+
+    const cards = Array.from(grid.querySelectorAll('.mc-card'));
+    const byWork = {};
+    cards.forEach(card => {
+      byWork[card.dataset.work] = {
+        card,
+        count: card.querySelector('[data-count]'),
+        last: card.querySelector('[data-last]'),
+        btn: card.querySelector('[data-cheer]'),
+        status: card.querySelector('[data-status]'),
+        value: 0
+      };
+    });
+
+    function setStatus(w, text, kind) {
+      w.status.textContent = text || '';
+      w.status.className = 'mc-status' + (kind ? ' ' + kind : '');
+    }
+    function fmtLast(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      if (isNaN(d)) return '';
+      const p = n => String(n).padStart(2, '0');
+      return '최근 응원: ' + p(d.getMonth() + 1) + '/' + p(d.getDate()) + ' ' + p(d.getHours()) + ':' + p(d.getMinutes());
+    }
+    function paint(w) {
+      w.count.textContent = w.value;
+      w.last.textContent = fmtLast(w.lastAt);
+    }
+
+    // 정렬: 기본 순(sort_order) / 응원 많은 순(count desc)
+    let sortMode = 'default';
+    const baseOrder = cards.map(c => c.dataset.work); // HTML에 적힌 순서 = 기본 순
+    function applySort() {
+      let order = baseOrder.slice();
+      if (sortMode === 'top') {
+        order.sort((a, b) => (byWork[b].value - byWork[a].value) || (baseOrder.indexOf(a) - baseOrder.indexOf(b)));
+      }
+      order.forEach(wk => grid.appendChild(byWork[wk].card));
+    }
+    const btnDefault = document.getElementById('mc-sort-default');
+    const btnTop = document.getElementById('mc-sort-top');
+    function setSort(mode) {
+      sortMode = mode;
+      btnDefault.setAttribute('aria-pressed', String(mode === 'default'));
+      btnTop.setAttribute('aria-pressed', String(mode === 'top'));
+      applySort();
+    }
+    btnDefault.addEventListener('click', () => setSort('default'));
+    btnTop.addEventListener('click', () => setSort('top'));
+
+    // 서버에서 노래별 개수 + 최근 시각 불러오기
+    async function loadCounts() {
+      // 1차: 집계 뷰 reaction_counts 사용
+      try {
+        const res = await fetch(REST + 'reaction_counts?select=work_id,cheer_count,last_cheer_at', {
+          headers: Object.assign({ Accept: 'application/json' }, HDRS)
+        });
+        if (res.ok) {
+          const rows = await res.json();
+          for (const r of rows) {
+            const w = byWork[r.work_id];
+            if (w) { w.value = +r.cheer_count || 0; w.lastAt = r.last_cheer_at || null; paint(w); }
+          }
+          applySort();
+          return;
+        }
+      } catch (e) { /* 폴백으로 진행 */ }
+
+      // 2차 폴백: reactions를 work_id별로 직접 count
+      await Promise.all(Object.keys(byWork).map(async wk => {
+        const w = byWork[wk];
+        try {
+          const res = await fetch(
+            REST + 'reactions?select=created_at&work_id=eq.' + encodeURIComponent(wk) +
+            '&order=created_at.desc&limit=1',
+            { headers: Object.assign({ Accept: 'application/json', Prefer: 'count=exact' }, HDRS) }
+          );
+          if (!res.ok) throw new Error('bad status');
+          const rows = await res.json();
+          const range = res.headers.get('Content-Range') || '';
+          const totalStr = range.split('/')[1];
+          w.value = (totalStr && totalStr !== '*') ? parseInt(totalStr, 10) : rows.length;
+          w.lastAt = rows[0] ? rows[0].created_at : null;
+          paint(w);
+        } catch (e) {
+          setStatus(w, '개수를 불러오지 못했어요.', 'err');
+        }
+      }));
+      applySort();
+    }
+
+    // 응원하기: INSERT 성공 후에만 +1
+    async function cheer(wk) {
+      const w = byWork[wk];
+      w.btn.disabled = true;
+      setStatus(w, '저장 중…', '');
+      try {
+        const res = await fetch(REST + 'reactions', {
+          method: 'POST',
+          headers: Object.assign(
+            { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+            HDRS
+          ),
+          body: JSON.stringify({ work_id: wk })
+        });
+        if (!res.ok) {
+          setStatus(w, '저장에 실패했어요. 잠시 후 다시 시도해 주세요.', 'err');
+          return; // 실패 → 숫자 그대로
+        }
+        // 성공한 뒤에만 숫자 증가 + 성공 메시지
+        w.value += 1;
+        w.lastAt = new Date().toISOString();
+        paint(w);
+        setStatus(w, '응원이 저장되었습니다!', 'ok');
+        if (sortMode === 'top') applySort();
+      } catch (e) {
+        setStatus(w, '저장에 실패했어요. 네트워크를 확인해 주세요.', 'err');
+      } finally {
+        w.btn.disabled = false;
+      }
+    }
+
+    cards.forEach(card => {
+      const wk = card.dataset.work;
+      byWork[wk].btn.addEventListener('click', () => cheer(wk));
+    });
+
+    loadCounts();
   })();
   </script>
   <script>

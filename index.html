@@ -375,13 +375,27 @@
   </script>
   <script>
   // 방명록 (Guestbook)
-  // - API: /api/guestbook (netlify.toml 리다이렉트 → netlify/functions/guestbook)
+  // - Supabase REST(PostgREST)를 브라우저에서 직접 호출한다.
+  //   → GitHub Pages(정적 호스팅)에서도 서버 함수 없이 읽기/쓰기가 동작한다.
+  //   → Netlify에서도 같은 코드가 그대로 동작한다.
+  // - 여기 쓰는 키는 "anon public" 키다(공개 가능). service_role 키는 절대 넣지 않는다.
+  // - 쓰기 범위는 Supabase RLS 정책으로 제한한다
+  //   (anon INSERT 허용 + 길이 CHECK, UPDATE/DELETE 정책 없음 → 수정·삭제 불가).
   // - 렌더링은 textContent만 사용해 방문자 입력을 HTML로 실행하지 않는다.
-  // - 브라우저 측 길이 검증 + 서버 검증(이중 방어).
+  // - 브라우저 측 길이 검증 + DB CHECK 제약(이중 방어).
   (function () {
     const form = document.getElementById('gb-form');
     if (!form) return;
-    const API = '/api/guestbook';
+
+    // ▼▼▼ 아래 두 값을 Supabase 대시보드(Project Settings → API)의 값으로 채우세요.
+    //     SUPA_URL  : Project URL        (예: https://xxxx.supabase.co)
+    //     SUPA_ANON : anon public 키     (service_role 아님!)
+    const SUPA_URL = 'https://zphzpmbuvqiknqfuiitu.supabase.co';
+    const SUPA_ANON = 'sb_publishable_DGc4vNTgEaWvTugqM-XPQQ_CRr9Qzwx';
+    // ▲▲▲
+
+    const REST = SUPA_URL + '/rest/v1/guestbook';
+    const HDRS = { apikey: SUPA_ANON, Authorization: 'Bearer ' + SUPA_ANON };
     const NICK_MIN = 2, NICK_MAX = 12, MSG_MIN = 1, MSG_MAX = 100;
 
     const nick = document.getElementById('gb-nick');
@@ -450,11 +464,20 @@
 
     async function load() {
       try {
-        const res = await fetch(API, { headers: { 'Accept': 'application/json' } });
+        // 최근 LIST_LIMIT개 조회 + 전체 개수(Content-Range 헤더)로 집계.
+        const url = REST +
+          '?select=id,nickname,message,created_at' +
+          '&order=created_at.desc&limit=' + LIST_LIMIT;
+        const res = await fetch(url, {
+          headers: Object.assign({ Accept: 'application/json', Prefer: 'count=exact' }, HDRS)
+        });
         if (!res.ok) throw new Error('bad status');
-        const data = await res.json();
-        if (!data.ok) throw new Error('not ok');
-        render(data.items, data.total);
+        const items = await res.json();
+        // Content-Range 예: "0-19/137" → 슬래시 뒤가 전체 개수.
+        const range = res.headers.get('Content-Range') || '';
+        const totalStr = range.split('/')[1];
+        const totalNum = totalStr && totalStr !== '*' ? parseInt(totalStr, 10) : items.length;
+        render(items, totalNum);
       } catch (e) {
         total.textContent = '';
         list.textContent = '';
@@ -483,15 +506,24 @@
       submit.disabled = true;
       setStatus('등록 중…', '');
       try {
-        const res = await fetch(API, {
+        const res = await fetch(REST, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: Object.assign(
+            { 'Content-Type': 'application/json', Prefer: 'return=minimal' },
+            HDRS
+          ),
           body: JSON.stringify({ nickname: nv, message: mv })
         });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || !data.ok) {
-          // 서버 검증 실패 등 → 사유 표시, 입력 내용은 지우지 않음
-          setStatus((data && data.error) || '등록에 실패했어요. 잠시 후 다시 시도해 주세요.', 'err');
+        if (!res.ok) {
+          // RLS 거부/길이 CHECK 위반 등 → 사유 표시, 입력 내용은 지우지 않음.
+          let reason = '등록에 실패했어요. 잠시 후 다시 시도해 주세요.';
+          if (res.status === 400 || res.status === 409) {
+            reason = '별명(' + NICK_MIN + '~' + NICK_MAX + '자)과 메시지(' +
+              MSG_MIN + '~' + MSG_MAX + '자) 길이를 확인해 주세요.';
+          } else if (res.status === 401 || res.status === 403) {
+            reason = '등록 권한이 없어요. 사이트 설정을 확인해 주세요.';
+          }
+          setStatus(reason, 'err');
           return;
         }
         // 성공 → 입력란 비우고 목록 새로고침

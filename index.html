@@ -6,98 +6,217 @@
   <meta name="description" content="정다빈의 금융·경제·데이터 분석 포트폴리오">
   <title>정다빈 | Finance & Data Portfolio</title>
   <style>
-    :root { --navy:#172b4d; --blue:#426da3; --light:#f3f7fb; --line:#e3eaf2; --muted:#65758a; --white:#fff; }
+    :root {
+      --bg:#0a0f1c;            /* 딥 네이비/블랙 */
+      --bg-soft:#0f1627;       /* 살짝 밝은 섹션 */
+      --panel:#121b30;         /* 카드 배경 */
+      --panel-2:#16203a;
+      --line:#223050;          /* 경계선 */
+      --text:#e6ecf7;          /* 본문 */
+      --muted:#8d9bb5;         /* 보조 텍스트 */
+      --mint:#4fe3c1;          /* 포인트 1 - 민트 */
+      --gold:#e8c06a;          /* 포인트 2 - 골드 */
+      --navy:#0a0f1c;
+    }
     * { box-sizing:border-box; }
     html { scroll-behavior:smooth; scroll-padding-top:88px; }
-    body { margin:0; color:#243248; font-family:Pretendard,'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; line-height:1.75; background:#fff; }
+    body {
+      margin:0; color:var(--text);
+      font-family:Pretendard,'Noto Sans KR',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+      line-height:1.75; background:var(--bg); overflow-x:hidden;
+    }
     a { color:inherit; text-decoration:none; }
-    .wrap { max-width:1050px; margin:0 auto; padding:0 26px; }
-    header { position:sticky; top:0; z-index:10; background:rgba(255,255,255,.96); border-bottom:1px solid var(--line); backdrop-filter:blur(12px); }
+    .wrap { max-width:1050px; margin:0 auto; padding:0 26px; position:relative; z-index:2; }
+
+    /* ===== 배경 레이어 ===== */
+    /* 마우스를 따라오는 스포트라이트/글로우 */
+    #spotlight {
+      position:fixed; inset:0; z-index:0; pointer-events:none;
+      background:radial-gradient(520px circle at var(--mx,50%) var(--my,30%),
+        rgba(79,227,193,.12), transparent 60%);
+      transition:background .12s ease-out;
+    }
+    /* 마우스에 반응하는 점/선 파티클 캔버스 */
+    #bg-particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
+    /* 은은한 그리드 + 차트 느낌의 고정 배경 */
+    #bg-grid {
+      position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.5;
+      background-image:
+        linear-gradient(rgba(79,227,193,.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(79,227,193,.05) 1px, transparent 1px);
+      background-size:46px 46px;
+      mask-image:radial-gradient(circle at 50% 20%, #000 0%, transparent 75%);
+      -webkit-mask-image:radial-gradient(circle at 50% 20%, #000 0%, transparent 75%);
+    }
+
+    /* ===== 헤더 ===== */
+    header {
+      position:sticky; top:0; z-index:20;
+      background:rgba(10,15,28,.72); border-bottom:1px solid var(--line);
+      backdrop-filter:blur(14px);
+    }
     .nav { min-height:70px; display:flex; justify-content:space-between; align-items:center; gap:20px; }
-    .logo { font-size:19px; font-weight:800; color:var(--navy); letter-spacing:-.5px; }
+    .logo { font-size:19px; font-weight:800; color:var(--text); letter-spacing:-.5px; }
     .menu { display:flex; gap:22px; flex-wrap:wrap; }
-    .menu a { color:var(--muted); font-size:13px; font-weight:600; }
-    .menu a:hover, .menu a:focus-visible { color:var(--blue); }
-    .hero { background:linear-gradient(120deg,#f0f5fb 0%,#fff 78%); padding:105px 0 110px; }
-    .eyebrow { color:var(--blue); font-weight:700; font-size:13px; letter-spacing:2px; text-transform:uppercase; }
-    h1 { color:var(--navy); font-size:clamp(38px,6vw,62px); line-height:1.28; letter-spacing:-2px; margin:18px 0 22px; }
-    .hero p { max-width:650px; color:#586a80; font-size:17px; }
-    .actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:32px; }
-    .btn { display:inline-block; border-radius:8px; padding:11px 20px; font-size:14px; font-weight:700; border:1px solid var(--navy); }
-    .btn.primary { background:var(--navy); color:#fff; }
-    .btn.secondary { background:#fff; color:var(--navy); }
-    section { padding:80px 0; }
-    section.alt { background:#f8fafc; }
-    .section-title { margin:0 0 8px; font-size:29px; letter-spacing:-.8px; color:var(--navy); }
-    .section-sub { color:var(--muted); margin:0 0 32px; font-size:14px; }
-    .intro { max-width:800px; font-size:16px; }
+    .menu a { color:var(--muted); font-size:13px; font-weight:600; position:relative; transition:color .2s; }
+    .menu a::after {
+      content:""; position:absolute; left:0; bottom:-4px; width:0; height:2px;
+      background:var(--mint); transition:width .25s ease;
+    }
+    .menu a:hover, .menu a:focus-visible { color:var(--mint); }
+    .menu a:hover::after, .menu a:focus-visible::after { width:100%; }
+
+    /* ===== 히어로 ===== */
+    .hero { padding:120px 0 120px; position:relative; }
+    .eyebrow { color:var(--mint); font-weight:700; font-size:13px; letter-spacing:3px; text-transform:uppercase; }
+    h1 {
+      color:var(--text); font-size:clamp(38px,6.2vw,66px); line-height:1.22;
+      letter-spacing:-2px; margin:18px 0 12px; font-weight:800;
+    }
+    h1 .accent { color:var(--mint); }
+    .type-line { color:var(--gold); font-size:clamp(18px,3vw,26px); font-weight:700; min-height:1.4em; margin:0 0 22px; }
+    .type-caret { display:inline-block; width:2px; background:var(--mint); margin-left:2px; animation:blink 1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity:0; } }
+    .hero p { max-width:650px; color:var(--muted); font-size:17px; }
+    .actions { display:flex; gap:12px; flex-wrap:wrap; margin-top:34px; }
+    .btn {
+      display:inline-block; border-radius:9px; padding:12px 22px; font-size:14px; font-weight:700;
+      border:1px solid transparent; transition:transform .18s ease, box-shadow .25s ease, background .25s, color .25s;
+    }
+    .btn.primary { background:var(--mint); color:#06241d; box-shadow:0 0 0 rgba(79,227,193,0); }
+    .btn.primary:hover { transform:translateY(-3px) scale(1.04); box-shadow:0 10px 30px rgba(79,227,193,.35); }
+    .btn.secondary { background:transparent; color:var(--text); border-color:var(--line); }
+    .btn.secondary:hover { transform:translateY(-3px) scale(1.04); border-color:var(--mint); color:var(--mint); box-shadow:0 10px 30px rgba(79,227,193,.15); }
+
+    /* ===== 섹션 ===== */
+    section { padding:88px 0; position:relative; z-index:2; }
+    section.alt { background:var(--bg-soft); }
+    .section-title { margin:0 0 8px; font-size:30px; letter-spacing:-.8px; color:var(--text); font-weight:800; }
+    .section-title::before { content:"// "; color:var(--mint); font-weight:700; }
+    .section-sub { color:var(--muted); margin:0 0 34px; font-size:14px; }
+    .intro { max-width:820px; font-size:16px; color:#c3cde0; }
+
     .info-grid, .cards { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; }
-    .card { padding:25px 27px; border:1px solid var(--line); background:#fff; border-radius:12px; }
-    .card h3 { margin:0 0 8px; color:var(--navy); font-size:18px; }
+    .card {
+      padding:25px 27px; border:1px solid var(--line); background:var(--panel); border-radius:14px;
+      transition:transform .15s ease, border-color .25s, box-shadow .25s; position:relative;
+      transform-style:preserve-3d; will-change:transform;
+    }
+    .card::before {
+      content:""; position:absolute; inset:0; border-radius:14px; pointer-events:none; opacity:0;
+      background:radial-gradient(260px circle at var(--cx,50%) var(--cy,50%), rgba(79,227,193,.14), transparent 60%);
+      transition:opacity .25s;
+    }
+    .card:hover { border-color:rgba(79,227,193,.45); box-shadow:0 18px 50px rgba(0,0,0,.45); }
+    .card:hover::before { opacity:1; }
+    .card h3 { margin:0 0 8px; color:var(--text); font-size:18px; }
     .card p { margin:6px 0 0; color:var(--muted); font-size:14px; }
-    .label { color:var(--muted); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.7px; }
-    .value { margin-top:5px; color:var(--navy); font-weight:650; overflow-wrap:anywhere; }
-    .timeline { border-left:2px solid #cbd9e9; margin-left:8px; padding-left:26px; display:grid; gap:28px; }
+    .label { color:var(--mint); font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; }
+    .value { margin-top:5px; color:var(--text); font-weight:650; overflow-wrap:anywhere; }
+
+    .timeline { border-left:2px solid var(--line); margin-left:8px; padding-left:26px; display:grid; gap:28px; }
     .timeline-item { position:relative; }
-    .timeline-item::before { content:""; position:absolute; width:11px; height:11px; border-radius:50%; background:var(--blue); left:-32.5px; top:8px; }
-    .timeline-item h3 { margin:0; font-size:18px; color:var(--navy); }
-    .timeline-item .date { color:var(--blue); font-size:13px; font-weight:700; }
+    .timeline-item::before {
+      content:""; position:absolute; width:11px; height:11px; border-radius:50%;
+      background:var(--mint); left:-32.5px; top:8px; box-shadow:0 0 12px rgba(79,227,193,.7);
+    }
+    .timeline-item h3 { margin:0; font-size:18px; color:var(--text); }
+    .timeline-item .date { color:var(--gold); font-size:13px; font-weight:700; }
     .timeline-item p { color:var(--muted); margin:6px 0 0; font-size:14px; }
+
     .cert { display:flex; align-items:center; justify-content:space-between; gap:15px; border-bottom:1px solid var(--line); padding:18px 0; }
     .cert:first-child { padding-top:0; }
     .cert:last-child { border-bottom:0; }
-    .cert strong { color:var(--navy); }
+    .cert strong { color:var(--text); }
     .cert small { display:block; color:var(--muted); margin-top:3px; }
-    .tag { white-space:nowrap; background:#e8f1ec; color:#26704c; font-size:12px; font-weight:700; border-radius:20px; padding:5px 12px; }
-    .tag.study { background:#eaf1fb; color:#416ba0; }
+    .tag { white-space:nowrap; background:rgba(79,227,193,.12); color:var(--mint); font-size:12px; font-weight:700; border-radius:20px; padding:5px 12px; border:1px solid rgba(79,227,193,.25); }
+    .tag.study { background:rgba(232,192,106,.12); color:var(--gold); border-color:rgba(232,192,106,.3); }
+
     .chips { display:flex; flex-wrap:wrap; gap:9px; margin-top:14px; }
-    .chip { padding:7px 12px; border-radius:7px; background:var(--light); color:#395574; font-size:13px; font-weight:600; }
+    .chip { padding:7px 12px; border-radius:7px; background:var(--panel-2); color:#aebbd3; font-size:13px; font-weight:600; border:1px solid var(--line); transition:border-color .2s, color .2s; }
+    .chip:hover { border-color:var(--mint); color:var(--mint); }
+
     .career-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:16px; }
-    .career-grid .number { font-size:12px; color:var(--blue); font-weight:800; letter-spacing:1px; }
-    .contact { background:var(--navy); color:#fff; }
-    .contact .section-title { color:#fff; }
-    .contact .section-sub { color:#d5dfed; }
-    .email { font-size:clamp(18px,3vw,25px); font-weight:700; overflow-wrap:anywhere; text-decoration:underline; text-underline-offset:5px; }
-    footer { padding:24px; text-align:center; font-size:12px; color:var(--muted); border-top:1px solid var(--line); }
-    @media(max-width:750px) { .nav { align-items:flex-start; flex-direction:column; padding-top:16px; padding-bottom:16px; gap:10px; } .menu { gap:12px 17px; } .menu a { font-size:12px; } .hero { padding:75px 0; } section { padding:58px 0; } .info-grid,.cards,.career-grid { grid-template-columns:1fr; } h1 { letter-spacing:-1px; } }
+    .career-grid .number { font-size:12px; color:var(--mint); font-weight:800; letter-spacing:1px; font-family:'Courier New',monospace; }
+
+    .contact { background:linear-gradient(135deg,#0c1322,#0f1b33); }
+    .contact .section-title { color:var(--text); }
+    .contact .section-sub { color:var(--muted); }
+    .email {
+      font-size:clamp(18px,3vw,26px); font-weight:700; overflow-wrap:anywhere; color:var(--mint);
+      border-bottom:2px solid rgba(79,227,193,.4); padding-bottom:4px; transition:border-color .25s;
+    }
+    .email:hover { border-color:var(--mint); }
+
+    footer { padding:26px; text-align:center; font-size:12px; color:var(--muted); border-top:1px solid var(--line); position:relative; z-index:2; }
+
+    /* ===== 스크롤 등장 애니메이션 ===== */
+    .reveal { opacity:0; transform:translateY(34px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+    .reveal.in { opacity:1; transform:none; }
+
+    @media(max-width:750px) {
+      .nav { align-items:flex-start; flex-direction:column; padding-top:16px; padding-bottom:16px; gap:10px; }
+      .menu { gap:12px 17px; } .menu a { font-size:12px; }
+      .hero { padding:80px 0; } section { padding:62px 0; }
+      .info-grid,.cards,.career-grid { grid-template-columns:1fr; } h1 { letter-spacing:-1px; }
+    }
+    /* 모바일/모션 축소: 무거운 효과 끄기 */
+    @media(max-width:750px) {
+      #spotlight, #bg-particles { display:none; }
+      .card { transform:none !important; }
+    }
+    @media (prefers-reduced-motion:reduce) {
+      .reveal { opacity:1; transform:none; transition:none; }
+      #spotlight, #bg-particles { display:none; }
+      .type-caret { animation:none; }
+    }
+
     /* GALAGA 미니게임 (이 영역 안에서만 적용) */
     #game-area { display:flex; flex-direction:column; align-items:center; }
-    #game-area canvas { width:min(100%,480px); height:auto; aspect-ratio:3/4; background:#000; border:2px solid #1c2548; border-radius:10px; touch-action:none; }
+    #game-area canvas { width:min(100%,480px); height:auto; aspect-ratio:3/4; background:#000; border:2px solid var(--line); border-radius:10px; touch-action:none; box-shadow:0 0 40px rgba(79,227,193,.08); }
     #game-area .pad { display:flex; gap:10px; margin-top:12px; width:min(100%,480px); }
-    #game-area .pad button { flex:1; padding:16px 0; font-size:20px; color:#e8ecff; background:#141a36; border:1px solid #2a3566; border-radius:10px; user-select:none; touch-action:none; cursor:pointer; }
-    #game-area .pad button:focus-visible { outline:2px solid #6ff; }
+    #game-area .pad button { flex:1; padding:16px 0; font-size:20px; color:var(--text); background:var(--panel); border:1px solid var(--line); border-radius:10px; user-select:none; touch-action:none; cursor:pointer; transition:background .2s, border-color .2s; }
+    #game-area .pad button:hover { border-color:var(--mint); }
+    #game-area .pad button:focus-visible { outline:2px solid var(--mint); }
     #game-area .hint { color:var(--muted); font-size:13px; margin:12px 0 0; text-align:center; }
     /* 두더지 잡기 (이 영역 안에서만 적용) */
     #mole-area { display:flex; flex-direction:column; align-items:center; }
-    #mole-area canvas { width:min(100%,480px); height:auto; aspect-ratio:3/4; border:2px solid #3b2a18; border-radius:10px; touch-action:none; cursor:none; }
+    #mole-area canvas { width:min(100%,480px); height:auto; aspect-ratio:3/4; border:2px solid var(--line); border-radius:10px; touch-action:none; cursor:none; box-shadow:0 0 40px rgba(232,192,106,.08); }
     #mole-area .hint { color:var(--muted); font-size:13px; margin:12px 0 0; text-align:center; }
+
     /* 방명록 (Guestbook) */
     #guestbook .gb-form { display:grid; grid-template-columns:200px 1fr auto; gap:10px; align-items:start; margin-bottom:10px; }
     #guestbook .gb-field { display:flex; flex-direction:column; gap:4px; }
-    #guestbook input[type=text] { width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; color:#243248; background:#fff; }
-    #guestbook input[type=text]:focus-visible { outline:2px solid var(--blue); outline-offset:1px; border-color:var(--blue); }
+    #guestbook input[type=text] { width:100%; padding:11px 13px; border:1px solid var(--line); border-radius:8px; font-size:14px; font-family:inherit; color:var(--text); background:var(--panel); }
+    #guestbook input[type=text]::placeholder { color:#5f6e88; }
+    #guestbook input[type=text]:focus-visible { outline:2px solid var(--mint); outline-offset:1px; border-color:var(--mint); }
     #guestbook .gb-count { font-size:11px; color:var(--muted); text-align:right; }
-    #guestbook .gb-submit { padding:11px 22px; border-radius:8px; border:1px solid var(--navy); background:var(--navy); color:#fff; font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap; height:44px; }
-    #guestbook .gb-submit:hover { background:#0f1f3a; }
-    #guestbook .gb-submit:disabled { opacity:.55; cursor:not-allowed; }
+    #guestbook .gb-submit { padding:11px 22px; border-radius:8px; border:1px solid var(--mint); background:var(--mint); color:#06241d; font-size:14px; font-weight:700; cursor:pointer; white-space:nowrap; height:44px; transition:transform .18s, box-shadow .25s; }
+    #guestbook .gb-submit:hover { transform:translateY(-2px); box-shadow:0 8px 24px rgba(79,227,193,.35); }
+    #guestbook .gb-submit:disabled { opacity:.55; cursor:not-allowed; transform:none; box-shadow:none; }
     #guestbook .gb-status { min-height:20px; font-size:13px; margin:2px 0 26px; }
-    #guestbook .gb-status.ok { color:#26704c; }
-    #guestbook .gb-status.err { color:#c0392b; }
+    #guestbook .gb-status.ok { color:var(--mint); }
+    #guestbook .gb-status.err { color:#ff7a6a; }
     #guestbook .gb-list { list-style:none; margin:0; padding:0; display:grid; gap:12px; }
-    #guestbook .gb-item { border:1px solid var(--line); background:#fff; border-radius:12px; padding:16px 18px; }
+    #guestbook .gb-item { border:1px solid var(--line); background:var(--panel); border-radius:12px; padding:16px 18px; transition:border-color .2s; }
+    #guestbook .gb-item:hover { border-color:rgba(79,227,193,.35); }
     #guestbook .gb-item .gb-top { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
-    #guestbook .gb-item .gb-nick { color:var(--navy); font-weight:700; font-size:15px; overflow-wrap:anywhere; }
+    #guestbook .gb-item .gb-nick { color:var(--mint); font-weight:700; font-size:15px; overflow-wrap:anywhere; }
     #guestbook .gb-item .gb-time { color:var(--muted); font-size:12px; white-space:nowrap; }
-    #guestbook .gb-item .gb-msg { margin:7px 0 0; color:#3a4a60; font-size:14px; overflow-wrap:anywhere; white-space:pre-wrap; }
+    #guestbook .gb-item .gb-msg { margin:7px 0 0; color:#c3cde0; font-size:14px; overflow-wrap:anywhere; white-space:pre-wrap; }
     #guestbook .gb-empty { color:var(--muted); font-size:14px; }
     #guestbook .gb-total { color:var(--muted); font-size:13px; margin:0 0 14px; min-height:18px; }
     @media(max-width:750px) { #guestbook .gb-form { grid-template-columns:1fr; } #guestbook .gb-submit { width:100%; } }
   </style>
 </head>
 <body>
+  <div id="bg-grid" aria-hidden="true"></div>
+  <canvas id="bg-particles" aria-hidden="true"></canvas>
+  <div id="spotlight" aria-hidden="true"></div>
+
   <header>
     <nav class="nav wrap" aria-label="주요 메뉴">
-      <a href="#home" class="logo">DABIN<span style="color:#7296c0">.</span></a>
+      <a href="#home" class="logo">DABIN<span style="color:var(--mint)">.</span></a>
       <div class="menu">
         <a href="#about">ABOUT</a><a href="#education">EDUCATION</a><a href="#certifications">CERTIFICATIONS</a><a href="#skills">SKILLS</a><a href="#career">CAREER</a><a href="#project">PROJECT</a><a href="#contact">CONTACT</a><a href="#guestbook">GUESTBOOK</a>
       </div>
@@ -106,14 +225,15 @@
   <main>
     <div class="hero" id="home"><div class="wrap">
       <div class="eyebrow">Finance · Economics · Data</div>
-      <h1>안녕하세요,<br>정다빈입니다.</h1>
+      <h1>안녕하세요,<br><span class="accent">정다빈</span>입니다.</h1>
+      <p class="type-line"><span id="typed"></span><span class="type-caret">&nbsp;</span></p>
       <p>금융과 데이터를 연결하는 인재를 꿈꿉니다.<br>경제를 이해하고, 데이터를 분석하며, 더 나은 의사결정에 기여하고 싶습니다.</p>
       <div class="actions"><a class="btn primary" href="#about">자기소개 보기 →</a><a class="btn secondary" href="#contact">Contact Me</a></div>
     </div></div>
     <section id="about"><div class="wrap">
-      <h2 class="section-title">About Me</h2><p class="section-sub">저를 소개합니다</p>
-      <p class="intro">안녕하세요. 국민대학교 경영정보학부에 재학 중인 정다빈입니다. 경영정보학을 공부하며 데이터 분석과 정보기술에 대한 이해를 넓히고 있습니다. 경제학과 금융시장에도 관심을 갖고 공부하며, 데이터를 기반으로 합리적인 의사결정을 돕는 금융 분야의 인재로 성장하고자 합니다.</p>
-      <div class="info-grid" style="margin-top:28px">
+      <h2 class="section-title reveal">About Me</h2><p class="section-sub reveal">저를 소개합니다</p>
+      <p class="intro reveal">안녕하세요. 국민대학교 경영정보학부에 재학 중인 정다빈입니다. 경영정보학을 공부하며 데이터 분석과 정보기술에 대한 이해를 넓히고 있습니다. 경제학과 금융시장에도 관심을 갖고 공부하며, 데이터를 기반으로 합리적인 의사결정을 돕는 금융 분야의 인재로 성장하고자 합니다.</p>
+      <div class="info-grid reveal" style="margin-top:28px">
         <div class="card"><div class="label">Name</div><div class="value">정다빈 | Jung Da Bin</div></div>
         <div class="card"><div class="label">University</div><div class="value">국민대학교</div></div>
         <div class="card"><div class="label">Major</div><div class="value">경영정보학부</div></div>
@@ -121,14 +241,14 @@
       </div>
     </div></section>
     <section class="alt" id="education"><div class="wrap">
-      <h2 class="section-title">Education</h2><p class="section-sub">현재 학력</p>
-      <div class="timeline">
+      <h2 class="section-title reveal">Education</h2><p class="section-sub reveal">현재 학력</p>
+      <div class="timeline reveal">
         <div class="timeline-item"><div class="date">2026.03 – 현재</div><h3>국민대학교 · 경영정보학부</h3><p>데이터 분석, 프로그래밍, 데이터베이스 및 경영정보 관련 학습</p></div>
       </div>
     </div></section>
     <section id="certifications"><div class="wrap">
-      <h2 class="section-title">Certifications</h2><p class="section-sub">취득 자격 및 현재 공부 중인 자격증</p>
-      <div class="card">
+      <h2 class="section-title reveal">Certifications</h2><p class="section-sub reveal">취득 자격 및 현재 공부 중인 자격증</p>
+      <div class="card reveal">
         <div class="cert"><div><strong>TESAT 3급</strong><small>한국경제신문 · 경제이론 및 시사경제</small></div><span class="tag">취득 완료</span></div>
         <div class="cert"><div><strong>SMAT 1급 (서비스경영자격)</strong><small>한국생산성본부 · 서비스경영 및 고객관리</small></div><span class="tag">취득 완료</span></div>
         <div class="cert"><div><strong>치과위생사 면허</strong><small>보건복지부 · 국가면허</small></div><span class="tag">취득 완료</span></div>
@@ -139,8 +259,8 @@
       </div>
     </div></section>
     <section class="alt" id="skills"><div class="wrap">
-      <h2 class="section-title">Skills & Interests</h2><p class="section-sub">학습하고 있는 기술과 관심 분야</p>
-      <div class="cards">
+      <h2 class="section-title reveal">Skills & Interests</h2><p class="section-sub reveal">학습하고 있는 기술과 관심 분야</p>
+      <div class="cards reveal">
         <div class="card"><h3>Data Analysis</h3><p>데이터를 정리하고 분석하는 기초 역량을 학습하고 있습니다.</p><div class="chips"><span class="chip">Python</span><span class="chip">R</span><span class="chip">SQL</span></div></div>
         <div class="card"><h3>Web Development</h3><p>웹 페이지 구조와 스타일, 기본적인 동작을 구현합니다.</p><div class="chips"><span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span></div></div>
         <div class="card"><h3>Business & Economics</h3><p>기업과 시장을 이해하기 위한 경영·경제 지식을 쌓고 있습니다.</p><div class="chips"><span class="chip">경제학</span><span class="chip">회계학</span><span class="chip">금융시장</span></div></div>
@@ -148,23 +268,23 @@
       </div>
     </div></section>
     <section id="career"><div class="wrap">
-      <h2 class="section-title">Career Goals</h2><p class="section-sub">앞으로 나아가고 싶은 방향</p>
-      <div class="career-grid">
+      <h2 class="section-title reveal">Career Goals</h2><p class="section-sub reveal">앞으로 나아가고 싶은 방향</p>
+      <div class="career-grid reveal">
         <div class="card"><div class="number">01 / DATA</div><h3>금융 데이터 분석가</h3><p>금융 데이터를 분석하여 시장의 흐름을 이해하고 의사결정을 지원하는 역할</p></div>
         <div class="card"><div class="number">02 / DIGITAL</div><h3>은행 디지털·IT</h3><p>IT 기술과 데이터를 활용해 편리하고 효율적인 금융서비스를 만드는 역할</p></div>
         <div class="card"><div class="number">03 / FINANCE</div><h3>금융·투자 분야</h3><p>경제와 기업을 분석하고 투자 및 금융시장에 대한 전문성을 키우는 분야</p></div>
       </div>
     </div></section>
     <section class="alt" id="project"><div class="wrap">
-      <h2 class="section-title">Project</h2><p class="section-sub">직접 만든 미니게임 · 아래에서 바로 플레이하세요</p>
-      <p class="intro" style="margin:0 0 26px; font-size:14px; color:var(--muted);">GALAGA 슈팅 게임과 두더지 잡기, 두 가지 미니게임을 직접 즐겨 보세요.</p>
-      <div class="card" style="margin-bottom:22px;">
-        <h3 style="margin:0 0 8px; color:var(--navy); font-size:19px;">🕹️ GALAGA 미니게임</h3>
+      <h2 class="section-title reveal">Project</h2><p class="section-sub reveal">직접 만든 미니게임 · 아래에서 바로 플레이하세요</p>
+      <p class="intro reveal" style="margin:0 0 26px; font-size:14px; color:var(--muted);">GALAGA 슈팅 게임과 두더지 잡기, 두 가지 미니게임을 직접 즐겨 보세요.</p>
+      <div class="card reveal" style="margin-bottom:22px;">
+        <h3 style="margin:0 0 8px; color:var(--text); font-size:19px;">🕹️ GALAGA 미니게임</h3>
         <p style="margin:0; color:var(--muted); font-size:14px;">HTML · CSS · JavaScript(Canvas)로 직접 구현한 클래식 슈팅 게임입니다. 방향키로 이동하고 Space로 발사하며, 최고 점수에 도전해 보세요.</p>
         <div class="chips"><span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip">Canvas</span></div>
       </div>
 
-      <div id="game-area">
+      <div id="game-area" class="reveal">
         <canvas id="g" width="480" height="640"></canvas>
         <div class="pad">
           <button id="bl" aria-label="왼쪽">◀</button>
@@ -174,23 +294,23 @@
         <p class="hint">← → 이동 · 스페이스 발사 · R 재시작 · 모바일은 버튼 터치</p>
       </div>
 
-      <div class="card" style="margin:36px 0 22px;">
-        <h3 style="margin:0 0 8px; color:var(--navy); font-size:19px;">🔨 두더지 잡기</h3>
+      <div class="card reveal" style="margin:36px 0 22px;">
+        <h3 style="margin:0 0 8px; color:var(--text); font-size:19px;">🔨 두더지 잡기</h3>
         <p style="margin:0; color:var(--muted); font-size:14px;">30초 안에 두더지를 최대한 많이 잡는 게임입니다. 두더지는 +10점, 검은 폭탄 두더지는 -20점이니 조심하세요.</p>
         <div class="chips"><span class="chip">HTML</span><span class="chip">CSS</span><span class="chip">JavaScript</span><span class="chip">Canvas</span></div>
       </div>
 
-      <div id="mole-area">
+      <div id="mole-area" class="reveal">
         <canvas id="mg" width="480" height="640"></canvas>
         <p class="hint">두더지를 클릭하거나 터치해서 잡으세요. 검은 폭탄 두더지는 피하세요.</p>
       </div>
     </div></section>
     <section class="contact" id="contact"><div class="wrap">
-      <h2 class="section-title">Contact</h2><p class="section-sub">함께 이야기하고 싶다면 이메일로 연락해 주세요.</p>
-      <a class="email" href="mailto:dabbin318@kookmin.ac.kr">dabbin318@kookmin.ac.kr ↗</a>
+      <h2 class="section-title reveal">Contact</h2><p class="section-sub reveal">함께 이야기하고 싶다면 이메일로 연락해 주세요.</p>
+      <a class="email reveal" href="mailto:dabbin318@kookmin.ac.kr">dabbin318@kookmin.ac.kr ↗</a>
     </div></section>
     <section class="alt" id="guestbook"><div class="wrap">
-      <h2 class="section-title">Guestbook</h2><p class="section-sub">방문 기념으로 짧은 응원 한 줄을 남겨 주세요.</p>
+      <h2 class="section-title reveal">Guestbook</h2><p class="section-sub reveal">방문 기념으로 짧은 응원 한 줄을 남겨 주세요.</p>
       <form class="gb-form" id="gb-form" autocomplete="off" novalidate>
         <div class="gb-field">
           <label for="gb-nick" class="label">별명</label>
@@ -216,6 +336,131 @@
   </main>
   <footer>© <span id="year">2026</span> Jung Da Bin. All rights reserved.</footer>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+
+  <!-- ===== 디자인 효과 스크립트 (스포트라이트 / 파티클 / 틸트 / 타이핑 / 스크롤 등장) ===== -->
+  <script>
+  (function () {
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isDesktop = window.matchMedia('(min-width:751px)').matches && !('ontouchstart' in window);
+
+    /* 1) 타이핑 애니메이션 (히어로) */
+    (function typing() {
+      const el = document.getElementById('typed');
+      if (!el) return;
+      const words = ['금융과 데이터를 연결하는 인재', 'Finance × Data Analyst', '데이터로 말하는 사람'];
+      if (reduce) { el.textContent = words[0]; return; }
+      let wi = 0, ci = 0, deleting = false;
+      function tick() {
+        const w = words[wi];
+        el.textContent = w.slice(0, ci);
+        if (!deleting && ci < w.length) { ci++; setTimeout(tick, 90); }
+        else if (!deleting && ci === w.length) { deleting = true; setTimeout(tick, 1600); }
+        else if (deleting && ci > 0) { ci--; setTimeout(tick, 45); }
+        else { deleting = false; wi = (wi + 1) % words.length; setTimeout(tick, 350); }
+      }
+      tick();
+    })();
+
+    /* 2) 스크롤 등장 (IntersectionObserver) */
+    (function reveal() {
+      const items = document.querySelectorAll('.reveal');
+      if (reduce || !('IntersectionObserver' in window)) { items.forEach(i => i.classList.add('in')); return; }
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+      }, { threshold:.14, rootMargin:'0px 0px -8% 0px' });
+      items.forEach(i => io.observe(i));
+    })();
+
+    if (!isDesktop || reduce) return; /* 모바일/모션 축소: 아래 마우스 효과는 생략 */
+
+    /* 3) 마우스 스포트라이트 */
+    (function spotlight() {
+      const sp = document.getElementById('spotlight');
+      let tx = innerWidth / 2, ty = innerHeight * .3, cx = tx, cy = ty, raf = 0;
+      addEventListener('pointermove', e => {
+        tx = e.clientX; ty = e.clientY;
+        if (!raf) raf = requestAnimationFrame(move);
+      }, { passive:true });
+      function move() {
+        cx += (tx - cx) * .18; cy += (ty - cy) * .18;
+        sp.style.setProperty('--mx', cx + 'px');
+        sp.style.setProperty('--my', cy + 'px');
+        if (Math.abs(tx - cx) > .5 || Math.abs(ty - cy) > .5) raf = requestAnimationFrame(move);
+        else raf = 0;
+      }
+    })();
+
+    /* 4) 카드 3D 틸트 */
+    (function tilt() {
+      document.querySelectorAll('.card').forEach(card => {
+        card.addEventListener('pointermove', e => {
+          const r = card.getBoundingClientRect();
+          const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+          const rx = (py - .5) * -8, ry = (px - .5) * 8;
+          card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+          card.style.setProperty('--cx', px * 100 + '%');
+          card.style.setProperty('--cy', py * 100 + '%');
+        });
+        card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+      });
+    })();
+
+    /* 5) 마우스에 반응하는 점/선 파티클 */
+    (function particles() {
+      const cv = document.getElementById('bg-particles');
+      const ctx = cv.getContext('2d');
+      let w, h, dpr, pts, mouse = { x:-9999, y:-9999 };
+      function resize() {
+        dpr = Math.min(2, devicePixelRatio || 1);
+        w = cv.width = innerWidth * dpr; h = cv.height = innerHeight * dpr;
+        cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
+        const n = Math.min(90, Math.floor(innerWidth / 18));
+        pts = Array.from({ length:n }, () => ({
+          x:Math.random() * w, y:Math.random() * h,
+          vx:(Math.random() - .5) * .25 * dpr, vy:(Math.random() - .5) * .25 * dpr
+        }));
+      }
+      resize();
+      addEventListener('resize', resize);
+      addEventListener('pointermove', e => { mouse.x = e.clientX * dpr; mouse.y = e.clientY * dpr; }, { passive:true });
+      addEventListener('pointerleave', () => { mouse.x = mouse.y = -9999; });
+      const LINK = 130, MLINK = 180;
+      function frame() {
+        ctx.clearRect(0, 0, w, h);
+        for (const p of pts) {
+          p.x += p.vx; p.y += p.vy;
+          if (p.x < 0 || p.x > w) p.vx *= -1;
+          if (p.y < 0 || p.y > h) p.vy *= -1;
+          // 마우스 쪽으로 살짝 끌림
+          const dmx = mouse.x - p.x, dmy = mouse.y - p.y, dm = Math.hypot(dmx, dmy);
+          if (dm < 220 * dpr) { p.x += dmx / dm * .4; p.y += dmy / dm * .4; }
+        }
+        // 선 연결
+        for (let i = 0; i < pts.length; i++) {
+          for (let j = i + 1; j < pts.length; j++) {
+            const a = pts[i], b = pts[j], d = Math.hypot(a.x - b.x, a.y - b.y);
+            if (d < LINK * dpr) {
+              ctx.strokeStyle = 'rgba(79,227,193,' + (.16 * (1 - d / (LINK * dpr))) + ')';
+              ctx.lineWidth = dpr; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+            }
+          }
+          // 마우스-점 연결
+          const a = pts[i], d = Math.hypot(a.x - mouse.x, a.y - mouse.y);
+          if (d < MLINK * dpr) {
+            ctx.strokeStyle = 'rgba(232,192,106,' + (.22 * (1 - d / (MLINK * dpr))) + ')';
+            ctx.lineWidth = dpr; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(mouse.x, mouse.y); ctx.stroke();
+          }
+        }
+        // 점
+        ctx.fillStyle = 'rgba(141,155,181,.55)';
+        for (const p of pts) { ctx.beginPath(); ctx.arc(p.x, p.y, 1.4 * dpr, 0, 6.28); ctx.fill(); }
+        requestAnimationFrame(frame);
+      }
+      frame();
+    })();
+  })();
+  </script>
+
   <script>
   (function () {
     const cv = document.getElementById('g');
